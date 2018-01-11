@@ -1,5 +1,8 @@
 package com.example.brian.subwaytime;
 
+import android.content.Context;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -20,10 +23,13 @@ public class MainActivity extends AppCompatActivity {
 
         //TODO make the sql database that holds all the data we have
 
+        //test stuff here
+            final WifiManager manager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+
         usrQueryObj.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
             }
 
             @Override
@@ -32,7 +38,8 @@ public class MainActivity extends AppCompatActivity {
                 String temp = "user changed text to:"+usrQueryObj.getText().toString();
                 Log.d("aaaagh",temp);
                 //works^
-
+                WifiInfo info = manager.getConnectionInfo();
+                Log.d("wifiinfo", info.toString());
             }
 
             @Override
