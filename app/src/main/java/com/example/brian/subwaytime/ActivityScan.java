@@ -52,6 +52,7 @@ public class ActivityScan extends AppCompatActivity {
             hasStarted=false;
         }
         //test code here
+        Log.d("wifistuff", wifiOut());
 
 
     }
