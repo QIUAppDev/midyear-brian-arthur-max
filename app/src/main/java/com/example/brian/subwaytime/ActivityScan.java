@@ -86,24 +86,29 @@ public class ActivityScan extends AppCompatActivity {
         final Network testNetwork_final = testNetwork;
         new AsyncTask<Void,Void,Void>(){
             protected Void doInBackground(Void...params){
+                //checks if network doesn't exist, and adds it if it does
                 if(appDatabase.networkDao().isAdded(testNetwork.getName(),testNetwork.getSsid(),testNetwork.getMac()).size()==0){
                     appDatabase.networkDao().insertAll(testNetwork);
                 }
                 else{
                     Log.d("Update","The Network " + testNetwork.getName() + " already exists, so it was not added");
                 }
+
+                //Some extra uesful diagnostic info
                 Log.d("number of networks",Integer.toString(appDatabase.networkDao().getCount()));
                 List<Network> network_list= appDatabase.networkDao().getAll();
                 for(Network a : network_list){
                     Log.d("Network " + a.getName(),"SSID: " + a.getSsid() + ", MAC: " + a.getMac());
                 }
+
+                //keep this around
                 return null;
             }
         }.execute();
     }
 
     public void resetDB(){
-        new AsyncTask<Void,Void,Void>(){
+        new AsyncTask<Void,Void,Void>(){ //deletes all rows as expected. don't run if there are no methods. idk what'll happen
             protected Void doInBackground(Void...params){
                 appDatabase.networkDao().deleteAll();
                 Log.d("update","all previous networks have been deleted");
