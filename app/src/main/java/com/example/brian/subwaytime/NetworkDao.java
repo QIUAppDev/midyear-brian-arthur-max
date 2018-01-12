@@ -14,23 +14,23 @@ import java.util.List;
 @Dao
 public interface NetworkDao {
 
-    @Query("SELECT * FROM NETWORK")
-    List<Network> getAll();
+    @Query("SELECT * FROM derpwork")
+    List<derpwork> getAll();
 
     /*check if the network's already there*/
-    @Query("SELECT * FROM NETWORK WHERE network_name LIKE :name OR ssid LIKE :ssid OR mac_address LIKE :mac")
-    List<Network> isAdded(String name, String ssid, String mac);
+    @Query("SELECT * FROM derpwork WHERE network_name LIKE :name OR ssid LIKE :ssid OR mac_address LIKE :mac")
+    List<derpwork> isAdded(String name, String ssid, String mac);
 
-    @Query("SELECT COUNT(*) FROM NETWORK")
+    @Query("SELECT COUNT(*) FROM derpwork")
     int getCount();
 
-    @Query("DELETE FROM NETWORK")
+    @Query("DELETE FROM derpwork")
     void deleteAll();
 
     @Insert
-    void insertAll(Network ... networks);
+    void insertAll(derpwork... derpworks);
 
     @Delete
-    void delete(Network network);
+    void delete(derpwork derpwork);
 
 }

@@ -79,27 +79,27 @@ public class ActivityScan extends AppCompatActivity {
     }*/
 
     public void testAdd(String name, String ss, String mac){
-        final Network testNetwork = new Network();
-        testNetwork.setName(name);
-        testNetwork.setSsid(ss);
-        testNetwork.setMac(mac);
+        final derpwork testDerpwork = new derpwork();
+        testDerpwork.setName(name);
+        testDerpwork.setSsid(ss);
+        testDerpwork.setMac(mac);
 
-        final Network testNetwork_final = testNetwork;
+        final derpwork testDerpwork_final = testDerpwork;
         new AsyncTask<Void,Void,Void>(){
             protected Void doInBackground(Void...params){
                 //checks if network doesn't exist, and adds it if it does
-                if(appDatabase.networkDao().isAdded(testNetwork.getName(),testNetwork.getSsid(),testNetwork.getMac()).size()==0){
-                    appDatabase.networkDao().insertAll(testNetwork);
+                if(appDatabase.networkDao().isAdded(testDerpwork.getName(), testDerpwork.getSsid(), testDerpwork.getMac()).size()==0){
+                    appDatabase.networkDao().insertAll(testDerpwork);
                 }
                 else{
-                    Log.d("Update","The Network " + testNetwork.getName() + " already exists, so it was not added");
+                    Log.d("Update","The derpwork " + testDerpwork.getName() + " already exists, so it was not added");
                 }
 
                 //Some extra uesful diagnostic info
                 Log.d("number of networks",Integer.toString(appDatabase.networkDao().getCount()));
-                List<Network> network_list= appDatabase.networkDao().getAll();
-                for(Network a : network_list){
-                    Log.d("Network " + a.getName(),"SSID: " + a.getSsid() + ", MAC: " + a.getMac());
+                List<derpwork> derpwork_list = appDatabase.networkDao().getAll();
+                for(derpwork a : derpwork_list){
+                    Log.d("derpwork " + a.getName(),"SSID: " + a.getSsid() + ", MAC: " + a.getMac());
                 }
 
                 //keep this around
