@@ -1,3 +1,8 @@
+/*
+* possible implementations:
+* -collapse Network item generation into a single method
+* */
+
 package com.example.brian.subwaytime;
 
 import android.content.Context;
@@ -54,6 +59,7 @@ public class ActivityScan extends AppCompatActivity {
             */
             hasStarted=true;
             testAdd("network_a","ss_a","mac_a");
+            //resetDB();
         }
         else if(hasStarted){
             button.setText("Start");
@@ -80,12 +86,27 @@ public class ActivityScan extends AppCompatActivity {
         final Network testNetwork_final = testNetwork;
         new AsyncTask<Void,Void,Void>(){
             protected Void doInBackground(Void...params){
-                appDatabase.networkDao().insertAll(testNetwork);
+                if(appDatabase.networkDao().isAdded(testNetwork.getName(),testNetwork.getSsid(),testNetwork.getMac()).size()==0){
+                    appDatabase.networkDao().insertAll(testNetwork);
+                }
+                else{
+                    Log.d("Update","The Network " + testNetwork.getName() + " already exists, so it was not added");
+                }
                 Log.d("number of networks",Integer.toString(appDatabase.networkDao().getCount()));
                 List<Network> network_list= appDatabase.networkDao().getAll();
                 for(Network a : network_list){
                     Log.d("Network " + a.getName(),"SSID: " + a.getSsid() + ", MAC: " + a.getMac());
                 }
+                return null;
+            }
+        }.execute();
+    }
+
+    public void resetDB(){
+        new AsyncTask<Void,Void,Void>(){
+            protected Void doInBackground(Void...params){
+                appDatabase.networkDao().deleteAll();
+                Log.d("update","all previous networks have been deleted");
                 return null;
             }
         }.execute();

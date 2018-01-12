@@ -19,10 +19,13 @@ public interface NetworkDao {
 
     /*check if the network's already there*/
     @Query("SELECT * FROM NETWORK WHERE network_name LIKE :name OR ssid LIKE :ssid OR mac_address LIKE :mac")
-    boolean isAdded(String name, String ssid, String mac);
+    List<Network> isAdded(String name, String ssid, String mac);
 
     @Query("SELECT COUNT(*) FROM NETWORK")
     int getCount();
+
+    @Query("DELETE FROM NETWORK")
+    void deleteAll();
 
     @Insert
     void insertAll(Network ... networks);
