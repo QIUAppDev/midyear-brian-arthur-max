@@ -18,8 +18,11 @@ public interface NetworkDao {
     List<Network> getAll();
 
     /*check if the network's already there*/
-    @Query("SELECT * FROM NETWORK WHERE network_name LIKE :name OR ssid LIKE :ssid OR mac_address LIKE mac")
+    @Query("SELECT * FROM NETWORK WHERE network_name LIKE :name OR ssid LIKE :ssid OR mac_address LIKE :mac")
     boolean isAdded(String name, String ssid, String mac);
+
+    @Query("SELECT COUNT(*) FROM NETWORK")
+    int getCount();
 
     @Insert
     void insertAll(Network ... networks);

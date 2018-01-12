@@ -11,7 +11,7 @@ import android.arch.persistence.room.PrimaryKey;
 @Entity
 public class Network {
 
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     public int network_id;
 
 
