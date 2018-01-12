@@ -5,9 +5,14 @@
 
 package com.example.brian.subwaytime;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -28,6 +33,12 @@ public class ActivityScan extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if(!(ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED)){
+            //if perms aren't granted, we ask
+            ActivityCompat.requestPermissions(ActivityScan,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},REQUEST_CODE); //TODO whats a request code?
+
+        }
         mainwifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan);
