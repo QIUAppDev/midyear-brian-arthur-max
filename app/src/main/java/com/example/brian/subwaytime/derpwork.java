@@ -9,7 +9,11 @@ import android.arch.persistence.room.PrimaryKey;
  */
 
 @Entity
-public class Network {
+public class derpwork {
+
+    public derpwork(){
+
+    }
 
     @PrimaryKey(autoGenerate = true)
     public int network_id;
