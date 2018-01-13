@@ -17,10 +17,10 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract NetworkDao networkDao();
     public static AppDatabase getDatabase(Context context){ /*implementation of "singleton" db*/
         if(INSTANCE==null){
-            static final Migration MIGRATION_1_2 = new Migration(1,2){
+            final Migration MIGRATION_1_2 = new Migration(1,2){
                 @Override
                 public void migrate(SupportSQLiteDatabase database){
-                    database.execSQL("");
+                    database.execSQL("ALTER TABLE network RENAME TO derpwork");
                 }
             };
             INSTANCE= Room.databaseBuilder(context,
