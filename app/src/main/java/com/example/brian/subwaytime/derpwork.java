@@ -24,14 +24,28 @@ public class derpwork {
     private String name;
 
 
-
     @ColumnInfo(name="ssid")
     private String ssid;
 
 
-
     @ColumnInfo(name="mac_address")
     private String mac;
+
+    @ColumnInfo(name="capabilities")
+    private String capabilities;
+
+    @ColumnInfo(name="level")
+    private String level;
+    @ColumnInfo(name="frequency")
+    private String frequency;
+    @ColumnInfo(name="timestamp")
+    private String timestamp;
+    @ColumnInfo(name="distance")
+    private String distance;
+    @ColumnInfo(name="distanceSD")
+    private String distanceSD;
+    @ColumnInfo(name="passpoint")
+    private String passpoint;
 
     public int getNetwork_id(){return network_id;}
     public void setNetwork_id(int id){network_id=id;}
@@ -45,5 +59,22 @@ public class derpwork {
     public String getMac(){return mac;}
     public void setMac(String m){mac=m;}
 
+    public String getCapabilities(){return capabilities;}
+    public void setCapabilities(String c){capabilities=c;}
+
+    public String getLevel(){return level;}
+    public void setLevel(String l){level=l;}
+
+    public String getFrequency(){return frequency;}
+    public void setFrequency(String f){frequency=f;}
+
+    public String getTimestamp(){return timestamp;}
+    public void setTimestamp(String t){timestamp=t;}
+
+    public String getDistance(){return distance;}
+    public void setDistance(String d){distance=d;}
+
+    public String getDistanceSD(){return distanceSD;}
+    public void setDistanceSD(String dsd){distanceSD=dsd;}
 
 }
