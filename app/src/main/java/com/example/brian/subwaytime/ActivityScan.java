@@ -92,7 +92,7 @@ public class ActivityScan extends AppCompatActivity {
                     oh and also this is a foreach loop, so just use the SSID to order the DB or the time added. Idc, just know there's no int i.
 
                     */
-                    //testAdd(input);
+                    testAdd(input[0],input[1],input[2],input[3],input[4],input[5],input[6],input[7],input[8],input[9]);
 
                 }
             } else {
@@ -100,14 +100,14 @@ public class ActivityScan extends AppCompatActivity {
                 hasStarted = false;
             }
             
-            testAdd("network_c","ss_c","mac_c", "cap_a","level_a","freq_a","tstamp_a","dista","distsd_a","pspnt_a");
+            //testAdd("network_c","ss_c","mac_c", "cap_a","level_a","freq_a","tstamp_a","dista","distsd_a","pspnt_a");
             //resetDB();
         }
         else if(hasStarted){ //stop app here
             button.setText("Start");
             text.setText("Finish");
             hasStarted=false;
-            testAdd("network_a","ss_a","mac_a", "cap_a","level_a","freq_a","tstamp_a","dista","distsd_a","pspnt_a");
+            //testAdd("network_a","ss_a","mac_a", "cap_a","level_a","freq_a","tstamp_a","dista","distsd_a","pspnt_a");
         }
         //test code here
         //Log.d("wifistuff", wifiOut());
