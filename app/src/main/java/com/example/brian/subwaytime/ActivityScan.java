@@ -34,6 +34,7 @@ public class ActivityScan extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("onCreate", "onCreate: App started.");
         if(!(ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
             == PackageManager.PERMISSION_GRANTED)){
             //if perms aren't granted, we ask
@@ -65,23 +66,44 @@ public class ActivityScan extends AppCompatActivity {
     }
 
     public void buttonClick(View v){
-        if(!hasStarted){
+        if(!hasStarted){ //start app here
             button.setText("Stop");
             text.setText("Running");
-            /*
+            
             if (mainwifi.startScan()){
                 Log.d("wifistuff", "wifi successfuly started");
                 hasStarted = true;
+                for (android.net.wifi.ScanResult i : mainwifi.getScanResults() //messy but it should work
+                     ) {
+                    String[] input = i.toString().split(",", -1);
+                    /* you know it's great when you need a multiline comment to explain what you just did
+                    input is an array of all the vars that you're gonna need. It will look something like the following array
+                    {SSID: ssidNameHere,
+                    BSSID: so:me:th:in:g_:in,
+                    capabilities: [WPA2-PSK-CCMP][ESS],
+                    level: -(this is signal strength, more negative, lower numbers mean stronger signal),
+                    frequency: (honestly irrelevant),
+                    timestamp: (presumably miliseconds since the code started),
+                    distance: (very inconsistent, might be a bad idea to use),
+                    distanceSD: (I have no idea),
+                    passpoint: (is personal hotspot),
+                    etc. you get the point. These will always be in the same order, so just query the int location of data you need. Stuff like at 0, you have SSID, and BSSID is it's mac address
+
+                    oh and also this is a foreach loop, so just use the SSID to order the DB or the time added. Idc, just know there's no int i.
+
+                    */
+                    testAdd(input);
+
+                }
             } else {
-                Log.d("wifistuff", "serious err, couldn't start wifi");//TODO PERMISSIONS
+                Log.d("wifistuff", "serious err, couldn't start wifi");//TODO PERMISSIONS potentially done rn
                 hasStarted = false;
             }
-            */
-            hasStarted=true;
-            testAdd("network_a","ss_a","mac_a");
+            
+            //testAdd("network_a","ss_a","mac_a");
             //resetDB();
         }
-        else if(hasStarted){
+        else if(hasStarted){ //stop app here
             button.setText("Start");
             text.setText("Finish");
             hasStarted=false;
