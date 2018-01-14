@@ -26,6 +26,7 @@ public class ActivityScan extends AppCompatActivity {
     boolean hasStarted = false;
     Button button;
     TextView text;
+    final int REQUEST_CODE=1;
 
     final AppDatabase appDatabase = AppDatabase.getDatabase(this);
 
@@ -36,8 +37,15 @@ public class ActivityScan extends AppCompatActivity {
         if(!(ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
             == PackageManager.PERMISSION_GRANTED)){
             //if perms aren't granted, we ask
-            //ActivityCompat.requestPermissions(ActivityScan,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},REQUEST_CODE); //TODO whats a request code?
+            ActivityCompat.requestPermissions(ActivityScan.this,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},REQUEST_CODE); //TODO whats a request code?
 
+        }
+        if(ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED){
+            Log.d("permissions","permissions granted!");
+        }
+        else{
+            Log.d("permissions","denied, something sent wrong");
         }
         mainwifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         super.onCreate(savedInstanceState);
