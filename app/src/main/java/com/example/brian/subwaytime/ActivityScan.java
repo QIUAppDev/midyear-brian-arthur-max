@@ -100,14 +100,14 @@ public class ActivityScan extends AppCompatActivity {
                 hasStarted = false;
             }
             
-            //testAdd("network_a","ss_a","mac_a");
+            testAdd("network_c","ss_c","mac_c", "cap_a","level_a","freq_a","tstamp_a","dista","distsd_a","pspnt_a");
             //resetDB();
         }
         else if(hasStarted){ //stop app here
             button.setText("Start");
             text.setText("Finish");
             hasStarted=false;
-            //testAdd("network_b","ss_b","mac_b");
+            testAdd("network_a","ss_a","mac_a", "cap_a","level_a","freq_a","tstamp_a","dista","distsd_a","pspnt_a");
         }
         //test code here
         //Log.d("wifistuff", wifiOut());
@@ -148,7 +148,7 @@ public class ActivityScan extends AppCompatActivity {
                 Log.d("number of networks",Integer.toString(appDatabase.networkDao().getCount()));
                 List<derpwork> derpwork_list = appDatabase.networkDao().getAll();
                 for(derpwork a : derpwork_list){
-                    Log.d("derpwork " + a.getName(),"SSID: " + a.getSsid() + ", MAC: " + a.getMac());
+                    Log.d("derpwork " + a.getName(),"SSID: " + a.getSsid() + ", MAC: " + a.getMac() + ", capabilities," + a.getCapabilities());
                 }
 
                 //keep this around
