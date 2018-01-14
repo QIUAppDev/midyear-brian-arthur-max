@@ -77,4 +77,7 @@ public class derpwork {
     public String getDistanceSD(){return distanceSD;}
     public void setDistanceSD(String dsd){distanceSD=dsd;}
 
+    public String getPasspoint(){return passpoint;}
+    public void setPasspoint(String p){passpoint=p;}
+
 }

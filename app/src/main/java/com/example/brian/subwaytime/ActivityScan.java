@@ -107,7 +107,7 @@ public class ActivityScan extends AppCompatActivity {
             button.setText("Start");
             text.setText("Finish");
             hasStarted=false;
-            testAdd("network_b","ss_b","mac_b");
+            //testAdd("network_b","ss_b","mac_b");
         }
         //test code here
         //Log.d("wifistuff", wifiOut());
@@ -119,11 +119,19 @@ public class ActivityScan extends AppCompatActivity {
         return mainwifi.getScanResults().toString();
     }*/
 
-    public void testAdd(String name, String ss, String mac){
+    public void testAdd(String name, String ss, String mac, String cap, String level, String freq,String tstamp,String dist,String distsd,String pspnt ){
         final derpwork testDerpwork = new derpwork();
         testDerpwork.setName(name);
         testDerpwork.setSsid(ss);
         testDerpwork.setMac(mac);
+        //sub-details
+        testDerpwork.setCapabilities(cap);
+        testDerpwork.setLevel(level);
+        testDerpwork.setFrequency(freq);
+        testDerpwork.setTimestamp(tstamp);
+        testDerpwork.setDistance(dist);
+        testDerpwork.setDistanceSD(distsd);
+        testDerpwork.setPasspoint(pspnt);
 
         final derpwork testDerpwork_final = testDerpwork;
         new AsyncTask<Void,Void,Void>(){
