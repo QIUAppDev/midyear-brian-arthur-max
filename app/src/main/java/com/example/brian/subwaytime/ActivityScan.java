@@ -92,7 +92,7 @@ public class ActivityScan extends AppCompatActivity {
                     oh and also this is a foreach loop, so just use the SSID to order the DB or the time added. Idc, just know there's no int i.
 
                     */
-                    //testAdd(input);
+                    Log.d("shitfuck",i.toString());
 
                 }
             } else {
