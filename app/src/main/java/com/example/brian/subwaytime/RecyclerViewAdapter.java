@@ -13,7 +13,7 @@ import java.util.List;
  */
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.RecyclerViewHolder> {
-    private List<derpwork> network_list;
+    private List<derpwork> network_list; //dataset
     private View.OnClickListener onClickListener;
 
     public RecyclerViewAdapter(List<derpwork> derp_list, View.OnClickListener listener){
@@ -25,8 +25,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public RecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
         return new RecyclerViewHolder(LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.recyclerview_item, parent, false));
+        //sets up details for individual items via recyclerview_item xml file
+        //recyclerviewholder is a static class embedded here
     }
 
+    //set up details of each individual item
     @Override
     public void onBindViewHolder(final RecyclerViewHolder holder, int position) {
         derpwork network= network_list.get(position);
@@ -34,13 +37,17 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         holder.nameTextView.setText(network.getSsid());
         holder.dateTextView.setText(network.getMac());
         holder.itemView.setTag(network);
-        holder.itemView.setOnClickListener(onClickListener);
+        holder.itemView.setOnClickListener(onClickListener); //links a listener to the object
     }
+
+    //getter setter method
     @Override
     public int getItemCount() {
         return network_list.size();
     }
 
+
+    //changes network list and tells app the dataset changed
     public void addItems(List<derpwork> new_list) {
         network_list = new_list;
         notifyDataSetChanged();

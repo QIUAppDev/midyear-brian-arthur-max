@@ -1,5 +1,6 @@
 package com.example.brian.subwaytime;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
@@ -21,8 +22,8 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
-    private ResultViewModel viewModel;
-    private RecyclerViewAdapter recyclerViewAdapter;
+    private ResultViewModel viewModel; //interacts with database (i.e. makes the necssary queries)
+    private RecyclerViewAdapter recyclerViewAdapter; //the middleman between the recyclerview front-end and the backend
     private RecyclerView recyclerView;
 
     @Override
@@ -33,13 +34,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         final EditText usrQueryObj = findViewById(R.id.userQueryInput);
 
         recyclerView = (RecyclerView) findViewById(R.id.listView);
+
+        //instantiates the adapter and links recyclerview with it
         recyclerViewAdapter = new RecyclerViewAdapter(new ArrayList<derpwork>(), this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
         recyclerView.setAdapter(recyclerViewAdapter);
 
+        //instantiates the ResultViewModel
         viewModel = ViewModelProviders.of(this).get(ResultViewModel.class);
 
+        //tells the app to observe changes made to the ui (i.e. the
         viewModel.getOutput_list().observe(MainActivity.this, new Observer<List<derpwork>>() {
             @Override
             public void onChanged(@Nullable List<derpwork> itemAndPeople) {
@@ -61,11 +65,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 //TODO function here to update the list
+                //this remains unchanged
                 String temp = "user changed text to:"+usrQueryObj.getText().toString();
                 Log.d("aaaagh",temp);
                 //works^
                 WifiInfo info = manager.getConnectionInfo();
                 Log.d("wifiinfo", info.toString());
+
+
+                //this is the part I added
+                String query = usrQueryObj.getText().toString();
+                viewModel.query_for_search_result(query);
+
+
             }
 
             @Override

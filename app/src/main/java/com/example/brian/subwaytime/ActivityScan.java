@@ -130,7 +130,9 @@ public class ActivityScan extends AppCompatActivity {
         final String nameF = name;
         new AsyncTask<Void,Void,Void>(){
             protected Void doInBackground(Void...params){
-                List<derpwork> results = appDatabase.networkDao().station_query(nameF); //the actual search query
+                List<derpwork> results = appDatabase.networkDao().station_query_nonLiveData(nameF);
+
+
                 if(results.size()==0){Log.e("search results for " + nameF, "no search results were found,");}
                 else{
                     Log.d("search results for " + nameF, "found!");
@@ -173,8 +175,8 @@ public class ActivityScan extends AppCompatActivity {
 
                 //Some extra uesful diagnostic info
                 Log.d("number of networks",Integer.toString(appDatabase.networkDao().getCount()));
-                List<derpwork> derpwork_list = (List<derpwork>)appDatabase.networkDao().getAll();
-                //I cast the list object to List<derpwork> to ensure this method still worked
+                List<derpwork> derpwork_list = appDatabase.networkDao().getAll_nonLiveData();
+
                 for(derpwork a : derpwork_list){
                     Log.d("derpwork " + a.getName(),"SSID: " + a.getSsid() + ", MAC: " + a.getMac() + ", levels: " + a.getLevel());
                 }

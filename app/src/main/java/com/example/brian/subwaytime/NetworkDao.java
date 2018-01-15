@@ -24,7 +24,25 @@ public interface NetworkDao {
     List<derpwork> isAdded(String name, String ssid, String mac);
 
     @Query("SELECT * FROM derpwork WHERE network_name LIKE :name")
-    List<derpwork> station_query(String name);
+    LiveData<List<derpwork>> station_query(String name);
+
+
+
+
+    //queries that use List<> to ensure that the ScanActivity methods work
+
+    @Query("SELECT * FROM derpwork")
+    List<derpwork> getAll_nonLiveData(); //List<derpwork> was the original. LiveData ensured the front end works iwth backend.
+    //changes were accordingly made on the ActivityScan side, so things should still work
+
+    /*check if the network's already there*/
+    @Query("SELECT * FROM derpwork WHERE network_name LIKE :name OR ssid LIKE :ssid OR mac_address LIKE :mac")
+    List<derpwork> isAdded_nonLiveData(String name, String ssid, String mac);
+
+    @Query("SELECT * FROM derpwork WHERE network_name LIKE :name")
+    List<derpwork> station_query_nonLiveData(String name);
+
+
 
     @Query("SELECT COUNT(*) FROM derpwork")
     int getCount();
