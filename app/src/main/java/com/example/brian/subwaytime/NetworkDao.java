@@ -21,6 +21,9 @@ public interface NetworkDao {
     @Query("SELECT * FROM derpwork WHERE network_name LIKE :name OR ssid LIKE :ssid OR mac_address LIKE :mac")
     List<derpwork> isAdded(String name, String ssid, String mac);
 
+    @Query("SELECT * FROM derpwork WHERE network_name LIKE :name")
+    List<derpwork> station_query(String name);
+
     @Query("SELECT COUNT(*) FROM derpwork")
     int getCount();
 

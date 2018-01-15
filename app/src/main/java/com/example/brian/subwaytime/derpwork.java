@@ -20,7 +20,7 @@ public class derpwork {
 
 
 
-    @ColumnInfo(name="network_name")
+    @ColumnInfo(name="network_name") //actually station names
     private String name;
 
 

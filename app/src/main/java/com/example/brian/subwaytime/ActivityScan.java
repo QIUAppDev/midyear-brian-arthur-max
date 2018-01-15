@@ -93,6 +93,10 @@ public class ActivityScan extends AppCompatActivity {
 
                     */
                     Log.d("shitfuck",i.toString());
+                    testAdd(input[0],input[0],input[1],input[2],input[3],input[4],input[5],input[6],input[7],input[8]);
+                    //this passes the output to the database
+                    //input[0] will be replaced with the station names eventually
+
 
                 }
             } else {
@@ -107,10 +111,12 @@ public class ActivityScan extends AppCompatActivity {
             button.setText("Start");
             text.setText("Finish");
             hasStarted=false;
+            queryDB("network_a"); //searches the database
             //testAdd("network_b","ss_b","mac_b");
         }
         //test code here
         //Log.d("wifistuff", wifiOut());
+
 
 
     }
@@ -119,10 +125,30 @@ public class ActivityScan extends AppCompatActivity {
         return mainwifi.getScanResults().toString();
     }*/
 
+    public void queryDB(String name){ //does the search query
+        final String nameF = name;
+        new AsyncTask<Void,Void,Void>(){
+            protected Void doInBackground(Void...params){
+                List<derpwork> results = appDatabase.networkDao().station_query(nameF); //the actual search query
+                if(results.size()==0){Log.e("search results for " + nameF, "no search results were found,");}
+                else{
+                    Log.d("search results for " + nameF, "found!");
+                    for(derpwork network : results){
+                        Log.d(nameF + " search result", " station name: " + network.getName() + " network name: "
+                                + network.getSsid() + " station MAC address: " + network.getMac());
+                        //outputs any results
+
+                    }
+                }
+                return null;
+            }
+        }.execute();
+    }
+
     public void testAdd(String name, String ss, String mac, String cap, String level, String freq,String tstamp,String dist,String distsd,String pspnt ){
         final derpwork testDerpwork = new derpwork();
-        testDerpwork.setName(name);
-        testDerpwork.setSsid(ss);
+        testDerpwork.setName(name); //again, name refers to the STATION NAME, not the NETWORK NAME
+        testDerpwork.setSsid(ss); //this refers to the NETWORK NOISE
         testDerpwork.setMac(mac);
         //sub-details
         testDerpwork.setCapabilities(cap);
@@ -148,7 +174,7 @@ public class ActivityScan extends AppCompatActivity {
                 Log.d("number of networks",Integer.toString(appDatabase.networkDao().getCount()));
                 List<derpwork> derpwork_list = appDatabase.networkDao().getAll();
                 for(derpwork a : derpwork_list){
-                    Log.d("derpwork " + a.getName(),"SSID: " + a.getSsid() + ", MAC: " + a.getMac());
+                    Log.d("derpwork " + a.getName(),"SSID: " + a.getSsid() + ", MAC: " + a.getMac() + ", levels: " + a.getLevel());
                 }
 
                 //keep this around
