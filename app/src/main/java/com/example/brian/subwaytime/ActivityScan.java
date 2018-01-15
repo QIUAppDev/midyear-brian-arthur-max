@@ -133,6 +133,7 @@ public class ActivityScan extends AppCompatActivity {
         //Log.d("wifistuff", wifiOut());
 
         queryList();
+        queryDB("network_a","ss_a","mac_a");
         //resetDB();
     }
 
@@ -155,6 +156,27 @@ public class ActivityScan extends AppCompatActivity {
         }.execute();
     }
 
+    public void queryDB(String name, String ss, String mac){
+        final String nameF = name;
+        final String ssF = ss;
+        final String macF = mac;
+        new AsyncTask<Void, Void, Void>(){
+            protected Void doInBackground(Void...params){
+                List<derpwork> result = appDatabase.networkDao().isAdded(nameF,ssF,macF);
+                if(result.size()==0){Log.e("search results","no results were found.");}
+                else{
+                    for(derpwork net : result){
+                        Log.d("search results","results successfull:");
+                        Log.d("derpwork " + net.getName(),"SSID: " + net.getSsid() + ", MAC: " + net.getMac() +
+                                ", capabilities: " + net.getCapabilities() + " level: " + net.getCapabilities()
+                                + " frequency: " + net.getLevel() + " timestamp: " + net.getTimestamp()
+                                + " distance: " + net.getDistance() + " distanceSD: " + net.getDistanceSD());
+                    }
+                }
+                return null;
+            }
+        }.execute();
+    }
     public void testAdd(String name, String ss, String mac, String cap, String level, String freq,String tstamp,String dist,String distsd,String pspnt ){
         final derpwork testDerpwork = new derpwork();
         testDerpwork.setName(name);
