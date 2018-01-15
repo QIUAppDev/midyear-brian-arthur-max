@@ -14,7 +14,7 @@ import android.content.Context;
 @Database(entities = {derpwork.class},version=2)
 public abstract class AppDatabase extends RoomDatabase {
     private static AppDatabase INSTANCE;
-    public abstract NetworkDao networkDao();
+
     public static AppDatabase getDatabase(Context context){ /*implementation of "singleton" db*/
         if(INSTANCE==null){
             final Migration MIGRATION_1_2 = new Migration(1,2){
@@ -29,4 +29,5 @@ public abstract class AppDatabase extends RoomDatabase {
         }
         return INSTANCE;
     }
+    public abstract NetworkDao networkDao();
 }

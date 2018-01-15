@@ -19,7 +19,7 @@ public class ResultViewModel extends AndroidViewModel {
     public ResultViewModel(Application application){
         super(application);
         appDatabase = AppDatabase.getDatabase(this.getApplication());
-        output_list = (LiveData<List<derpwork>>)appDatabase.networkDao().getAll();
+        output_list = appDatabase.networkDao().getAll();
     }
 
     public LiveData<List<derpwork>> getOutput_list(){

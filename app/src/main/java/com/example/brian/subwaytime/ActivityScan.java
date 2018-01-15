@@ -7,6 +7,7 @@ package com.example.brian.subwaytime;
 
 import android.Manifest;
 import android.app.Activity;
+import android.arch.lifecycle.LiveData;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
@@ -172,7 +173,8 @@ public class ActivityScan extends AppCompatActivity {
 
                 //Some extra uesful diagnostic info
                 Log.d("number of networks",Integer.toString(appDatabase.networkDao().getCount()));
-                List<derpwork> derpwork_list = appDatabase.networkDao().getAll();
+                List<derpwork> derpwork_list = (List<derpwork>)appDatabase.networkDao().getAll();
+                //I cast the list object to List<derpwork> to ensure this method still worked
                 for(derpwork a : derpwork_list){
                     Log.d("derpwork " + a.getName(),"SSID: " + a.getSsid() + ", MAC: " + a.getMac() + ", levels: " + a.getLevel());
                 }
