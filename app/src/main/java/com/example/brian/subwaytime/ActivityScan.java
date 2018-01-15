@@ -41,7 +41,7 @@ public class ActivityScan extends AppCompatActivity {
 
         if(!hasPermissions(ActivityScan.this,PERMISSIONS)){ActivityCompat.requestPermissions(this,PERMISSIONS,REQUEST_CODE);}
 
-        
+
 
         if(ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED){
@@ -120,24 +120,40 @@ public class ActivityScan extends AppCompatActivity {
                 hasStarted = false;
             }
             
-            //testAdd("network_c","ss_c","mac_c", "cap_a","level_a","freq_a","tstamp_a","dista","distsd_a","pspnt_a");
-            //resetDB();
+            testAdd("network_c","ss_c","mac_c", "cap_a","level_a","freq_a","tstamp_a","dista","distsd_a","pspnt_a");
+
         }
         else if(hasStarted){ //stop app here
             button.setText("Start");
             text.setText("Finish");
             hasStarted=false;
-            //testAdd("network_a","ss_a","mac_a", "cap_a","level_a","freq_a","tstamp_a","dista","distsd_a","pspnt_a");
+            testAdd("network_a","ss_a","mac_a", "cap_a","level_a","freq_a","tstamp_a","dista","distsd_a","pspnt_a");
         }
         //test code here
         //Log.d("wifistuff", wifiOut());
 
-
+        queryList();
+        //resetDB();
     }
 
     /*private String wifiOut(){
         return mainwifi.getScanResults().toString();
     }*/
+
+    public void queryList(){
+        new AsyncTask<Void,Void,Void>(){
+            protected Void doInBackground(Void...params){
+                List<derpwork> list = appDatabase.networkDao().getAll();
+                for(derpwork net:list){
+                    Log.d("derpwork " + net.getName(),"SSID: " + net.getSsid() + ", MAC: " + net.getMac() +
+                            ", capabilities: " + net.getCapabilities() + " level: " + net.getCapabilities()
+                            + " frequency: " + net.getLevel() + " timestamp: " + net.getTimestamp()
+                            + " distance: " + net.getDistance() + " distanceSD: " + net.getDistanceSD());
+                }
+               return null;
+            }
+        }.execute();
+    }
 
     public void testAdd(String name, String ss, String mac, String cap, String level, String freq,String tstamp,String dist,String distsd,String pspnt ){
         final derpwork testDerpwork = new derpwork();
@@ -178,7 +194,7 @@ public class ActivityScan extends AppCompatActivity {
     }
 
     public void resetDB(){
-        new AsyncTask<Void,Void,Void>(){ //deletes all rows as expected. don't run if there are no methods. idk what'll happen
+        new AsyncTask<Void,Void,Void>(){ //deletes all rows as expected. don't run if there are no rows. idk what'll happen
             protected Void doInBackground(Void...params){
                 appDatabase.networkDao().deleteAll();
                 Log.d("update","all previous networks have been deleted");
