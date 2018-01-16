@@ -21,7 +21,7 @@ public interface NetworkDao {
     //changes were accordingly made on the ActivityScan side, so things should still work
 
     /*check if the network's already there*/
-    @Query("SELECT * FROM derpwork WHERE network_name LIKE '%' + :name + '%' OR ssid LIKE '%'+:ssid+'%' OR mac_address LIKE '%'+:mac+'%'")
+    @Query("SELECT * FROM derpwork WHERE network_name LIKE :name OR ssid LIKE :ssid OR mac_address LIKE :mac")
     List<derpwork> isAdded(String name, String ssid, String mac);
 
     @Query("SELECT * FROM derpwork WHERE network_name LIKE :name")
