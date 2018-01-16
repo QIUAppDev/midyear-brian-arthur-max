@@ -1,6 +1,7 @@
 package com.example.brian.subwaytime;
 
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
@@ -20,7 +21,7 @@ public interface NetworkDao {
     //changes were accordingly made on the ActivityScan side, so things should still work
 
     /*check if the network's already there*/
-    @Query("SELECT * FROM derpwork WHERE network_name LIKE :name OR ssid LIKE :ssid OR mac_address LIKE :mac")
+    @Query("SELECT * FROM derpwork WHERE network_name LIKE '%' + :name + '%' OR ssid LIKE '%'+:ssid+'%' OR mac_address LIKE '%'+:mac+'%'")
     List<derpwork> isAdded(String name, String ssid, String mac);
 
     @Query("SELECT * FROM derpwork WHERE network_name LIKE :name")
@@ -39,7 +40,7 @@ public interface NetworkDao {
     @Query("SELECT * FROM derpwork WHERE network_name LIKE :name OR ssid LIKE :ssid OR mac_address LIKE :mac")
     List<derpwork> isAdded_nonLiveData(String name, String ssid, String mac);
 
-    @Query("SELECT * FROM derpwork WHERE network_name LIKE :name")
+    @Query("SELECT * FROM derpwork WHERE INSTR(network_name,:name)")
     List<derpwork> station_query_nonLiveData(String name);
 
 

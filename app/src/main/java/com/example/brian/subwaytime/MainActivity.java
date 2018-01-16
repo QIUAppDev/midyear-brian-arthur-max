@@ -76,8 +76,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //this is the part I added
                 String query = usrQueryObj.getText().toString();
                 viewModel.query_for_search_result(query);
-
-
             }
 
             @Override

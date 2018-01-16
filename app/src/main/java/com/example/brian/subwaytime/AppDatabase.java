@@ -24,7 +24,7 @@ public abstract class AppDatabase extends RoomDatabase {
                 }
             };
             INSTANCE= Room.databaseBuilder(context,
-                    AppDatabase.class, "network_db").addMigrations(MIGRATION_1_2).build();
+                    AppDatabase.class, "network_db").addMigrations(MIGRATION_1_2).allowMainThreadQueries().build();
 
         }
         return INSTANCE;

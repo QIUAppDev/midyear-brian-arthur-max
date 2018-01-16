@@ -3,6 +3,7 @@ package com.example.brian.subwaytime;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -13,19 +14,20 @@ import java.util.List;
  */
 
 public class ResultViewModel extends AndroidViewModel {
-    private final LiveData<List<derpwork>> output_list;
+    private MutableLiveData<List<derpwork>> output_list;
 
     private AppDatabase appDatabase; //instantiates database
 
     public ResultViewModel(Application application){
         super(application);
         appDatabase = AppDatabase.getDatabase(this.getApplication());
-        output_list = appDatabase.networkDao().getAll(); //grabs dataset
+        output_list = new MutableLiveData<List<derpwork>>();
+        output_list.setValue(appDatabase.networkDao().getAll_nonLiveData()); //grabs dataset
     }
 
 
     //getter method for dataset
-    public LiveData<List<derpwork>> getOutput_list(){
+    public MutableLiveData<List<derpwork>> getOutput_list(){
         return output_list;
     }
 
@@ -49,12 +51,21 @@ public class ResultViewModel extends AndroidViewModel {
 
     //does the actual querying-the-db-part
     public void query_for_search_result(String search_query){
-        LiveData<List<derpwork>> search_results = appDatabase.networkDao().station_query(search_query);
+        List<derpwork> search_results = appDatabase.networkDao().station_query_nonLiveData(search_query);
+        List<derpwork> full_results = appDatabase.networkDao().getAll_nonLiveData();
+        output_list.setValue(search_results);
+
+        Log.d("search query",search_query);
+        Log.d("search swapped","yes");
+        Log.d("size of result",Integer.toString(search_results.size()));
+        Log.d("full db size",Integer.toString(full_results.size()));
         //if(search_results==null){Log.e("does the object exist","no");}
         //else{Log.d("does the object exist","yes");}
 
         //for now, some demo code that Logs the search results
         //will eventually trigger changes
         //List<derpwork> results_log = (List<derpwork>)search_results;
+
+        //return search_results;
     }
 }
