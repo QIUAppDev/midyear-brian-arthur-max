@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -105,8 +106,8 @@ public class ActivityScan extends AppCompatActivity {
                 hasStarted = false;
             }
             
-            //testAdd("network_a","ss_a","mac_a");
-            //resetDB();
+            testAdd("network_c","ss_c","mac_c", "cap_a","level_a","freq_a","tstamp_a","dista","distsd_a","pspnt_a");
+
         }
         else if(hasStarted){ //stop app here
             button.setText("Start");
@@ -117,7 +118,6 @@ public class ActivityScan extends AppCompatActivity {
         }
         //test code here
         //Log.d("wifistuff", wifiOut());
-
 
 
     }
@@ -188,7 +188,7 @@ public class ActivityScan extends AppCompatActivity {
     }
 
     public void resetDB(){
-        new AsyncTask<Void,Void,Void>(){ //deletes all rows as expected. don't run if there are no methods. idk what'll happen
+        new AsyncTask<Void,Void,Void>(){ //deletes all rows as expected. don't run if there are no rows. idk what'll happen
             protected Void doInBackground(Void...params){
                 appDatabase.networkDao().deleteAll();
                 Log.d("update","all previous networks have been deleted");
