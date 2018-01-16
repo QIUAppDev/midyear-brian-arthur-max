@@ -1,6 +1,7 @@
 package com.example.brian.subwaytime;
 
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,9 +59,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private TextView itemTextView;
         private TextView nameTextView;
         private TextView dateTextView;
+        private CardView card_view;
 
         RecyclerViewHolder(View view) {
             super(view);
+            card_view = (CardView) view.findViewById(R.id.cv);
             itemTextView = (TextView) view.findViewById(R.id.itemTextView);
             nameTextView = (TextView) view.findViewById(R.id.nameTextView);
             dateTextView = (TextView) view.findViewById(R.id.dateTextView);
