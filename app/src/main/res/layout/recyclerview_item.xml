@@ -14,28 +14,34 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp"
+            android:lines="2"
             >
 
             <TextView
                 android:id="@+id/itemTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="24sp"
-                android:gravity="center" />
+                android:textSize="16sp"
+                android:lines="2"
+                android:layout_gravity="left" />
 
             <TextView
                 android:id="@+id/nameTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="24sp"
-                android:gravity="center" />
+                android:textSize="12sp"
+                android:lines="2"
+                android:gravity="center"
+                android:layout_toRightOf="@id/itemTextView"/>
 
             <TextView
                 android:id="@+id/dateTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="24sp"
-                android:gravity="center" />
+                android:textSize="12sp"
+                android:lines="2"
+                android:layout_gravity="left"
+                android:layout_below="@id/nameTextView"/>
 
         </RelativeLayout>
 
