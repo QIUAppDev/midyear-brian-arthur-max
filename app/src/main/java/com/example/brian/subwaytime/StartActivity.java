@@ -1,5 +1,6 @@
 package com.example.brian.subwaytime;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -23,14 +24,19 @@ public class StartActivity extends AppCompatActivity {
         activityScan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), ActivityScan.class);
+                startActivity(intent);
                 //add portal to ActivityScan
+                //portal to wifi scan
             }
         });
 
         mainActivity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //add portal to MainActivity
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                startActivity(intent);
+                //portal to go to display db
             }
         });
     }
