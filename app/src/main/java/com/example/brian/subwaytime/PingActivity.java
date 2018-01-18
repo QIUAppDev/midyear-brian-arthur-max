@@ -15,11 +15,16 @@ mTriggerEventListener = new TriggerEventListener() {
 };
 
 mSensorManager.requestTriggerSensor(mTriggerEventListener, mSensor);
+
+
+//proposal: add button?
 * */
 
 
 package com.example.brian.subwaytime;
 
+import android.content.Context;
+import android.graphics.Color;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -27,7 +32,9 @@ import android.net.wifi.WifiManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PingActivity extends AppCompatActivity {
@@ -35,15 +42,26 @@ public class PingActivity extends AppCompatActivity {
     //insert hotspot stuff here;
     private String ssid_temp = "G6";
     private String mac_temp = "de:0b:34:c4:ac:e7";
-    WifiManager mainwifi;
-    List<derpwork> networks;
+    private TextView ssid;
+    private TextView mac;
+    private TextView output;
+    private WifiManager mainwifi;
+    private List<derpwork> networks;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ping);
-
-
+        ssid = findViewById(R.id.textView5);
+        ssid.setText("SSID: " + ssid_temp);
+        mac = findViewById(R.id.textView6);
+        mac.setText("MAC: " + mac_temp);
+        output = findViewById(R.id.textView7);
+        output.setText("Out of Range");
+        output.setTextColor(Color.RED);
+        mainwifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        networks = new ArrayList<derpwork>();
         if (mainwifi.startScan()){
             Log.d("wifistuff", "wifi successfuly started");
             for (android.net.wifi.ScanResult i : mainwifi.getScanResults() //messy but it should work
@@ -87,12 +105,17 @@ public class PingActivity extends AppCompatActivity {
         } else {
             Log.d("wifistuff", "serious err, couldn't start wifi");//TODO PERMISSIONS potentially done rn
         }
-        for(derpwork network : networks){
-            if(network.getSsid().equals(ssid_temp) && network.getMac().equals(mac_temp)){
-                Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-                Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
-                r.play();
+        if(networks.size()>0){
+            for(derpwork network : networks){
+                if(network.getSsid().equals(ssid_temp) && network.getMac().equals(mac_temp)){
+                    Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+                    Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+                    r.play();
+                    output.setText("In Range!");
+                    output.setTextColor(Color.GREEN);
+                }
             }
         }
+
     }
 }
