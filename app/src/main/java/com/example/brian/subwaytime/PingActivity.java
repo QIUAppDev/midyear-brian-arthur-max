@@ -1,3 +1,23 @@
+/*
+* insert this code
+* private SensorManager mSensorManager;
+private Sensor mSensor;
+private TriggerEventListener mTriggerEventListener;
+...
+mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION);
+
+mTriggerEventListener = new TriggerEventListener() {
+    @Override
+    public void onTrigger(TriggerEvent event) {
+        // Do work
+    }
+};
+
+mSensorManager.requestTriggerSensor(mTriggerEventListener, mSensor);
+* */
+
+
 package com.example.brian.subwaytime;
 
 import android.media.Ringtone;

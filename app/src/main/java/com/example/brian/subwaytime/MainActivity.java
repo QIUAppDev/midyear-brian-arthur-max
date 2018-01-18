@@ -4,6 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.Intent;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.support.annotation.Nullable;
@@ -92,6 +93,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         Log.d("click","click!");
+        Intent intent = new Intent(getApplicationContext(),PingActivity.class);
+        startActivity(intent);
         //derpwork borrowModel = (derpwork) v.getTag();
         //viewModel.deleteItem(borrowModel);
         //return true;
