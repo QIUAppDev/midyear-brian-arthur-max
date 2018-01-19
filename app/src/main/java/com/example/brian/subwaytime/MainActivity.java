@@ -92,10 +92,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        Log.d("click","click!");
+        derpwork borrowModel = (derpwork) v.getTag();
         Intent intent = new Intent(getApplicationContext(),PingActivity.class);
+        intent.putExtra("davai hard", new String[]{borrowModel.getSsid(),borrowModel.getMac()});
         startActivity(intent);
-        //derpwork borrowModel = (derpwork) v.getTag();
         //viewModel.deleteItem(borrowModel);
         //return true;
     }

@@ -44,7 +44,7 @@ import java.util.List;
 public class PingActivity extends AppCompatActivity {
 
     //insert hotspot stuff here;
-    private String ssid_temp = "G6";
+    private String ssid_temp = "G6"; //left these two just in case shit breaks
     private String mac_temp = "de:0b:34:c4:ac:e7";
     private TextView ssid;
     private TextView mac;
@@ -62,13 +62,18 @@ public class PingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ping);
 
+        //dada dum du dum! (sakurasou was a really good anime)
+        String[] ins = getIntent().getStringArrayExtra("davai hard");
+        final String ssidText = ins[0];
+        final String macText = ins[1];
+
         //instantiates and sends ssid to ui
         ssid = findViewById(R.id.textView5);
-        ssid.setText("SSID: " + ssid_temp);
+        ssid.setText("SSID: " + ssidText);
 
         //instantiates and sends mac address to ui
         mac = findViewById(R.id.textView6);
-        mac.setText("MAC: " + mac_temp);
+        mac.setText("MAC: " + macText);
 
         //instanties and sends msg to user about wifi status
         //this is the initial condition, which will change if a wifi match is detected
@@ -147,7 +152,7 @@ public class PingActivity extends AppCompatActivity {
                 //runs through our list and checks for a match
                 if(networks.size()>0){
                     for(derpwork network : networks){
-                        if(network.getSsid().equals(ssid_temp) && network.getMac().equals(mac_temp)){
+                        if(network.getSsid().equals(ssidText) && network.getMac().equals(macText)){
 
                             //the ringer
                             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
