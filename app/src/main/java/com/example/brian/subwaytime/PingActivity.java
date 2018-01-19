@@ -33,6 +33,7 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -88,20 +89,13 @@ public class PingActivity extends AppCompatActivity {
         networks = new ArrayList<derpwork>();
 
 
+        //the timer
+        final Handler handler = new Handler();
+        final int delay = 5000; //milliseconds
 
-        //starts the sensor manager
-        //basically the code reference from android
-        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION);
-
-        mTriggerEventListener = new TriggerEventListener() {
-            @Override
-            public void onTrigger(TriggerEvent event) {
-
-
-                //when android detects the shaking, it triggers the scan
-
-                //essentially activityscan's code
+        handler.postDelayed(new Runnable(){
+            public void run(){
+                //do something
                 if (mainwifi.startScan()){
                     Log.d("wifistuff", "wifi successfuly started");
                     for (android.net.wifi.ScanResult i : mainwifi.getScanResults()) {
@@ -165,6 +159,26 @@ public class PingActivity extends AppCompatActivity {
                         }
                     }
                 }
+                handler.postDelayed(this, delay);
+            }
+        }, delay);
+
+
+        /*
+        //starts the sensor manager
+        //basically the code reference from android
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION);
+
+        mTriggerEventListener = new TriggerEventListener() {
+            @Override
+            public void onTrigger(TriggerEvent event) {
+
+
+                //when android detects the shaking, it triggers the scan
+
+                //essentially activityscan's code
+
 
                 //end of onTrigger method
             }
@@ -172,8 +186,7 @@ public class PingActivity extends AppCompatActivity {
 
         //starts the process, I think?
         mSensorManager.requestTriggerSensor(mTriggerEventListener, mSensor);
-
-
+        */
 
     }
 }
