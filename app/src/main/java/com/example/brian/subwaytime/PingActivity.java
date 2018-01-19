@@ -25,6 +25,10 @@ package com.example.brian.subwaytime;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
+import android.hardware.TriggerEvent;
+import android.hardware.TriggerEventListener;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -48,25 +52,56 @@ public class PingActivity extends AppCompatActivity {
     private WifiManager mainwifi;
     private List<derpwork> networks;
 
+    private SensorManager mSensorManager;
+    private Sensor mSensor;
+    private TriggerEventListener mTriggerEventListener;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ping);
+
+        //instantiates and sends ssid to ui
         ssid = findViewById(R.id.textView5);
         ssid.setText("SSID: " + ssid_temp);
+
+        //instantiates and sends mac address to ui
         mac = findViewById(R.id.textView6);
         mac.setText("MAC: " + mac_temp);
+
+        //instanties and sends msg to user about wifi status
+        //this is the initial condition, which will change if a wifi match is detected
         output = findViewById(R.id.textView7);
         output.setText("Out of Range");
         output.setTextColor(Color.RED);
+
+
         mainwifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+        //the wifi networks pinged are collected into a a list of derpwork objects, which we compare with the given ssid + mac
         networks = new ArrayList<derpwork>();
-        if (mainwifi.startScan()){
-            Log.d("wifistuff", "wifi successfuly started");
-            for (android.net.wifi.ScanResult i : mainwifi.getScanResults() //messy but it should work
-                    ) {
-                String[] input = i.toString().split(",", -1);
+
+
+
+        //starts the sensor manager
+        //basically the code reference from android
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION);
+
+        mTriggerEventListener = new TriggerEventListener() {
+            @Override
+            public void onTrigger(TriggerEvent event) {
+
+
+                //when android detects the shaking, it triggers the scan
+
+                //essentially activityscan's code
+                if (mainwifi.startScan()){
+                    Log.d("wifistuff", "wifi successfuly started");
+                    for (android.net.wifi.ScanResult i : mainwifi.getScanResults()) {
+                        //messy but it should work
+                        String[] input = i.toString().split(",", -1);
                     /* you know it's great when you need a multiline comment to explain what you just did
                     input is an array of all the vars that you're gonna need. It will look something like the following array
                     {SSID: ssidNameHere,
@@ -83,39 +118,57 @@ public class PingActivity extends AppCompatActivity {
                     oh and also this is a foreach loop, so just use the SSID to order the DB or the time added. Idc, just know there's no int i.
 
                     */
-                Log.d("shitfuck",i.toString());
-                derpwork testDerpwork = new derpwork();
-                testDerpwork.setName(input[0]); //again, name refers to the STATION NAME, not the NETWORK NAME
-                testDerpwork.setSsid(input[0]); //this refers to the NETWORK NOISE
-                testDerpwork.setMac(input[1]);
-                //sub-details
-                testDerpwork.setCapabilities(input[2]);
-                testDerpwork.setLevel(input[3]);
-                testDerpwork.setFrequency(input[4]);
-                testDerpwork.setTimestamp(input[5]);
-                testDerpwork.setDistance(input[6]);
-                testDerpwork.setDistanceSD(input[7]);
-                testDerpwork.setPasspoint(input[8]);
-                networks.add(testDerpwork);
-                //this passes the output to the database
-                //input[0] will be replaced with the station names eventually
+                        Log.d("shitfuck",i.toString());
+
+                        //instnatiates temporary derpwrok object and adds values to it
+                        derpwork testDerpwork = new derpwork();
+                        testDerpwork.setName(input[0]); //again, name refers to the STATION NAME, not the NETWORK NAME
+                        testDerpwork.setSsid(input[0]); //this refers to the NETWORK NOISE
+                        testDerpwork.setMac(input[1]);
+                        //sub-details
+                        testDerpwork.setCapabilities(input[2]);
+                        testDerpwork.setLevel(input[3]);
+                        testDerpwork.setFrequency(input[4]);
+                        testDerpwork.setTimestamp(input[5]);
+                        testDerpwork.setDistance(input[6]);
+                        testDerpwork.setDistanceSD(input[7]);
+                        testDerpwork.setPasspoint(input[8]);
+
+                        //adds value to list
+                        networks.add(testDerpwork);
 
 
-            }
-        } else {
-            Log.d("wifistuff", "serious err, couldn't start wifi");//TODO PERMISSIONS potentially done rn
-        }
-        if(networks.size()>0){
-            for(derpwork network : networks){
-                if(network.getSsid().equals(ssid_temp) && network.getMac().equals(mac_temp)){
-                    Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-                    Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
-                    r.play();
-                    output.setText("In Range!");
-                    output.setTextColor(Color.GREEN);
+
+                    }
+                } else {
+                    Log.d("wifistuff", "serious err, couldn't start wifi");//TODO PERMISSIONS potentially done rn
                 }
+
+                //runs through our list and checks for a match
+                if(networks.size()>0){
+                    for(derpwork network : networks){
+                        if(network.getSsid().equals(ssid_temp) && network.getMac().equals(mac_temp)){
+
+                            //the ringer
+                            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+                            Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+                            r.play();
+
+                            //changes condition to valid
+                            output.setText("In Range!");
+                            output.setTextColor(Color.GREEN);
+                        }
+                    }
+                }
+
+                //end of onTrigger method
             }
-        }
+        };
+
+        //starts the process, I think?
+        mSensorManager.requestTriggerSensor(mTriggerEventListener, mSensor);
+
+
 
     }
 }
