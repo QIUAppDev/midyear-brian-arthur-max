@@ -29,6 +29,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.hardware.TriggerEvent;
 import android.hardware.TriggerEventListener;
+import android.media.MediaPlayer;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -150,8 +151,8 @@ public class PingActivity extends AppCompatActivity {
 
                             //the ringer
                             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-                            Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
-                            r.play();
+                            MediaPlayer mp = MediaPlayer.create(getApplicationContext(),notification);
+                            mp.start();
 
                             //changes condition to valid
                             output.setText("In Range!");
