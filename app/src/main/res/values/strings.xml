@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">SubwayTime</string>
+    <string name="title_activity_data_get">dataGetActivity</string>
 </resources>
