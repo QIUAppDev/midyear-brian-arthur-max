@@ -6,13 +6,10 @@
 package com.example.brian.subwaytime;
 
 import android.Manifest;
-import android.app.Activity;
-import android.arch.lifecycle.LiveData;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -53,8 +50,8 @@ public class ActivityScan extends AppCompatActivity {
         mainwifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan);
-        button= (Button)findViewById(R.id.button);
-        text = (TextView)findViewById(R.id.textView2);
+        button= findViewById(R.id.button);
+        text = findViewById(R.id.textView2);
         /*
         start.setOnClickListener(new View.OnClickListener() {
             @Override
