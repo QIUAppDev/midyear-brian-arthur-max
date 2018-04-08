@@ -1,34 +1,70 @@
 package com.example.brian.subwaytime;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Hashtable;
+import java.util.TreeMap;
 
 import static android.hardware.Sensor.TYPE_MAGNETIC_FIELD;
 
-public class dataGetActivity extends AppCompatActivity {
+public class dataGetActivity extends AppCompatActivity implements SensorEventListener {
 
-    public ArrayList<String> TODOBRIANFIXTHIS;
+    public ArrayList<float[]> TODOBRIANFIXTHIS = new ArrayList<>();
     private SensorManager mSensorManager;
+    private Sensor mSensor;
     private String TAG = "dataGetActivity";
 
 //    https://developer.android.com/guide/topics/sensors/sensors_motion.html#sensors-motion-accel
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //check if the user is actually running magnetometer
+        //just a little something spliced into it for testing. Probably can stay
+        int REQUEST_CODE = 1;
+        if(!(ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED)){
+            //if perms aren't granted, we ask
+            ActivityCompat.requestPermissions(dataGetActivity.this,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},REQUEST_CODE); //TODO whats a request code?
+
+        }
+        if(ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED){
+            Log.d("permissions","permissions granted!");
+        }
+        else{
+            Log.d("permissions","denied, something sent wrong");
+        }
+
+        //initialize the references
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
+
+
+        //check if the user is actually running magnetometer
         String out = mSensorManager.getSensorList(TYPE_MAGNETIC_FIELD).toString();
         Log.d(TAG, "onCreate: type of magnetometer if at all:"+out);
+        if(out != ""){
+            //user has no magnetometer. This is an issue. TODO
+        }
+
 
 
 
@@ -41,6 +77,8 @@ public class dataGetActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.d(TAG, "onClick: "+TODOBRIANFIXTHIS.get(0)[0]);
+                Log.d(TAG, "onClick: "+ Arrays.deepToString(TODOBRIANFIXTHIS.toArray()));
                 Snackbar.make(view, "Started magnetic stuff", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
 
@@ -48,5 +86,20 @@ public class dataGetActivity extends AppCompatActivity {
             }
         });
     }
+    protected void onResume(){
+        super.onResume();
+        mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    public void onSensorChanged(SensorEvent event){
+        //Log.d(TAG, "onSensorChanged: 0="+event.values[0]+" 1="+event.values[1]+" 2="+event.values[2]);
+        float[] temp = {event.values[0],event.values[1],event.values[2]};
+        TODOBRIANFIXTHIS.add(temp);// lord knows why I can't do this inline
+    }
+    public void onAccuracyChanged(Sensor event, int accuracy){
+        Log.d(TAG, "onAccuracyChanged: "+accuracy);
+
+    }
+
 
 }
