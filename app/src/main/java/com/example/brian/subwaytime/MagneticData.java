@@ -17,21 +17,17 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Hashtable;
-import java.util.TreeMap;
 
 import static android.hardware.Sensor.TYPE_MAGNETIC_FIELD;
 
-public class dataGetActivity extends AppCompatActivity implements SensorEventListener {
+public class MagneticData extends AppCompatActivity implements SensorEventListener {
 
     public ArrayList<float[]> TODOBRIANFIXTHIS = new ArrayList<>();
     private SensorManager mSensorManager;
     private Sensor mSensor;
-    private String TAG = "dataGetActivity";
+    private String TAG = "MagneticData";
 
 //    https://developer.android.com/guide/topics/sensors/sensors_motion.html#sensors-motion-accel
     @Override
@@ -41,7 +37,7 @@ public class dataGetActivity extends AppCompatActivity implements SensorEventLis
         if(!(ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
             == PackageManager.PERMISSION_GRANTED)){
             //if perms aren't granted, we ask
-            ActivityCompat.requestPermissions(dataGetActivity.this,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},REQUEST_CODE); //TODO whats a request code?
+            ActivityCompat.requestPermissions(MagneticData.this,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},REQUEST_CODE); //TODO whats a request code?
 
         }
         if(ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
