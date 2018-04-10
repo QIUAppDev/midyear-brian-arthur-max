@@ -137,30 +137,37 @@ public class FirebaseTest extends AppCompatActivity {
 
         Log.d("testData","progress got here");
 
-        /*
-        derpwork test_network = new derpwork();
-        String MAC="mac_1";
-        test_network.setName("station_1"); //again, to store the actual station name
-        test_network.setSsid("test_network_1");
-        test_network.setCapabilities("capabilities_1");
-        test_network.setDistance("distance_1");
-        test_network.setDistanceSD("distanceSD_1");
-        test_network.setLevel("level_1");
-        test_network.setMac(MAC);
-        test_network.setPasspoint("passpoint_1");
-        test_network.setTimestamp("timestamp 1");
-        */
 
 
         //pulls the networks accumulated in the local Room database, and pushes it onto Firebase
         new AsyncTask<Void,Void,Void>(){
             protected Void doInBackground(Void... params){
+
+                //gets locally accumulated data
                 List<derpwork> all_networks = appDatabase.networkDao().getAll_nonLiveData();
-                HashMap<String, derpwork> wifi_push = new HashMap<>();
+                final HashMap<String, derpwork> wifi_push = new HashMap<>();
                 for(derpwork network : all_networks){
                     wifi_push.put(network.getSsid(), network);
                 }
-                myRef.setValue(wifi_push);
+
+                //downloads existing data, appends, and pushes
+                myRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Log.d("debugstep","stepping here");
+                        for(DataSnapshot network : dataSnapshot.getChildren()){
+                            derpwork input_network = network.getValue(derpwork.class);
+                            wifi_push.put(input_network.getSsid(),input_network);
+                        }
+                        myRef.setValue(wifi_push);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.w(TAG, "Failed to read value.", databaseError.toException());
+                    }
+                });
+
 
                 return null;
             }
