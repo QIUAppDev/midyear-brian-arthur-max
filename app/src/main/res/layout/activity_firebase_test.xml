@@ -10,23 +10,37 @@
         android:id="@+id/button4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:text="PUSH NETWORKS TO FIREBASE"
-        tools:layout_editor_absoluteX="79dp"
-        tools:layout_editor_absoluteY="164dp" />
+        app:layout_constraintBottom_toTopOf="@+id/button5"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/button5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="84dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:text="PULL NETWORKS FROM FIREBASE"
-        tools:layout_editor_absoluteX="71dp"
-        tools:layout_editor_absoluteY="308dp" />
+        app:layout_constraintBottom_toTopOf="@+id/button6"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/button6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="196dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:text="BACK TO MENU"
-        tools:layout_editor_absoluteX="130dp"
-        tools:layout_editor_absoluteY="414dp" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 </android.support.constraint.ConstraintLayout>

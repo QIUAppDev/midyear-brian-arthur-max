@@ -23,7 +23,9 @@
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity" />
         <activity android:name=".ActivityScan" />
-        <activity android:name=".StartActivity"></activity>
+        <activity android:name=".StartActivity">
+
+        </activity>
         <activity android:name=".PingActivity" />
         <activity
             android:name=".MagneticData"
