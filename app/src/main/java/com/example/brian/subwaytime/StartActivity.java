@@ -10,12 +10,14 @@ public class StartActivity extends AppCompatActivity {
 
     Button activityScan;
     Button mainActivity;
+    Button firebase;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
         activityScan = findViewById(R.id.button2);
         mainActivity = findViewById(R.id.button3);
+        firebase = findViewById(R.id.button7);
 
 
         //portal to easily switch between apps
@@ -37,6 +39,15 @@ public class StartActivity extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 startActivity(intent);
                 //portal to go to display db
+            }
+        });
+
+        firebase.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), FirebaseTest.class);
+                startActivity(intent);
+
             }
         });
     }
