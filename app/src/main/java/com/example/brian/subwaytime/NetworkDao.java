@@ -26,6 +26,9 @@ public interface NetworkDao {
     @Query("SELECT * FROM derpwork WHERE network_name LIKE :name")
     LiveData<List<derpwork>> station_query(String name);
 
+    @Query("SELECT * FROM derpwork WHERE :mac_address LIKE mac_address")
+    List<derpwork> station_query_mac_nonLiveData(String mac_address);
+
 
 
 

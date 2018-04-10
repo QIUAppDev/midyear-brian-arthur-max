@@ -103,7 +103,7 @@ public class FirebaseTest extends AppCompatActivity {
                     new AsyncTask<Void,Void,Void>(){
                         public Void doInBackground(Void... params){
                             Log.d("testwork name", testwork.getName());
-                            if(appDatabase.networkDao().isAdded_nonLiveData(testwork.getName(),testwork.getSsid(),testwork.getMac()).size()==0){
+                            if(appDatabase.networkDao().station_query_mac_nonLiveData(testwork.getMac()).size()==0){
                                 appDatabase.networkDao().insertAll(testwork);
                             }
                             else{
