@@ -83,8 +83,22 @@ public class FirebaseTest extends AppCompatActivity {
 
                 //pulls and directly de-serializes fresh network objects
                 for(DataSnapshot network : dataSnapshot.getChildren()){
-                    derpwork testwork = network.getValue(derpwork.class);
-                    Log.d("testwork name", testwork.getName());
+                    final derpwork testwork = network.getValue(derpwork.class);
+
+                    new AsyncTask<Void,Void,Void>(){
+                        public Void doInBackground(Void... params){
+                            Log.d("testwork name", testwork.getName());
+                            if(appDatabase.networkDao().isAdded_nonLiveData(testwork.getName(),testwork.getSsid(),testwork.getMac()).size()==0){
+                                appDatabase.networkDao().insertAll(testwork);
+                            }
+                            else{
+                                Log.e("network already here","The network called " + testwork.getSsid() + "is already in the db, so it wasn't added");
+                            }
+
+                            return null;
+                        }
+                    }.execute();
+
                 }
 
                 //TODO: write code that adds new objects to local db
