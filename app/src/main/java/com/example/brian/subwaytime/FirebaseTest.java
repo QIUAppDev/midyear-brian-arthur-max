@@ -147,7 +147,7 @@ public class FirebaseTest extends AppCompatActivity {
                 List<derpwork> all_networks = appDatabase.networkDao().getAll_nonLiveData();
                 final HashMap<String, derpwork> wifi_push = new HashMap<>();
                 for(derpwork network : all_networks){
-                    wifi_push.put(network.getSsid(), network);
+                    wifi_push.put(network.getMac(), network);
                 }
 
                 //downloads existing data, appends, and pushes
@@ -157,7 +157,7 @@ public class FirebaseTest extends AppCompatActivity {
                         Log.d("debugstep","stepping here");
                         for(DataSnapshot network : dataSnapshot.getChildren()){
                             derpwork input_network = network.getValue(derpwork.class);
-                            wifi_push.put(input_network.getSsid(),input_network);
+                            wifi_push.put(input_network.getMac(),input_network);
                         }
                         myRef.setValue(wifi_push);
                     }

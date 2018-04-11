@@ -159,11 +159,11 @@ final AppDatabase appDatabase = AppDatabase.getDatabase(this);
         testDerpwork.setDistanceSD(distsd);
         testDerpwork.setPasspoint(pspnt);
 
-        final derpwork testDerpwork_final = testDerpwork;
         new AsyncTask<Void,Void,Void>(){
             protected Void doInBackground(Void...params){
                 //checks if network doesn't exist, and adds it if it does
-                if(appDatabase.networkDao().isAdded(testDerpwork.getName(), testDerpwork.getSsid(), testDerpwork.getMac()).size()==0){
+                //this was the first problematic section
+                if(appDatabase.networkDao().station_query_mac_nonLiveData(testDerpwork.getMac()).size()==0){
                     appDatabase.networkDao().insertAll(testDerpwork);
                 }
                 else{
