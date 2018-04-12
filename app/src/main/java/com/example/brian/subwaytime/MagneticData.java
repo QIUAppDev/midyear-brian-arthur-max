@@ -91,6 +91,7 @@ public class MagneticData extends AppCompatActivity implements SensorEventListen
         //Log.d(TAG, "onSensorChanged: 0="+event.values[0]+" 1="+event.values[1]+" 2="+event.values[2]);
         float[] temp = {event.values[0],event.values[1],event.values[2]};
         TODOBRIANFIXTHIS.add(temp);// lord knows why I can't do this inline
+        Log.d("changed sensor","yes");
     }
     public void onAccuracyChanged(Sensor event, int accuracy){
         Log.d(TAG, "onAccuracyChanged: "+accuracy);

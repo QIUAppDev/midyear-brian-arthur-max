@@ -3,8 +3,11 @@ package com.example.brian.subwaytime;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+
+import java.util.UUID;
 
 public class StartActivity extends AppCompatActivity {
 
@@ -50,6 +53,13 @@ public class StartActivity extends AppCompatActivity {
 
             }
         });
+
+        //TODO: generate CONSTANT user id (UUID) to be persistently stored
+        //TODO: add timestamp to each magnetic data option
+        //TODO: link magnetism with wifi tracker in some way (perhaps make the switch continuous)
+        //TODO: this means the the button shouldn't be the WIFI scanner, but should be MAGNETISM tracker
+        String test_id = UUID.randomUUID().toString();
+        Log.d("test_id",test_id);
     }
 
 
