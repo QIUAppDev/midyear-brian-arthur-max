@@ -27,7 +27,7 @@ public class ActivityScan extends AppCompatActivity {
     TextView text;
     final int REQUEST_CODE=1;
 
-final AppDatabase appDatabase = AppDatabase.getDatabase(this);
+    final AppDatabase appDatabase = AppDatabase.getDatabase(this);
 
     WifiManager mainwifi;
 

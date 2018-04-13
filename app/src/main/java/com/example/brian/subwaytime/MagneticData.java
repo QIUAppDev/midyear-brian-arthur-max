@@ -25,6 +25,8 @@ import static android.hardware.Sensor.TYPE_MAGNETIC_FIELD;
 public class MagneticData extends AppCompatActivity implements SensorEventListener {
 
     public ArrayList<float[]> TODOBRIANFIXTHIS = new ArrayList<>();
+    public ArrayList<Long> timestamps = new ArrayList<>();
+
     private SensorManager mSensorManager;
     private Sensor mSensor;
     private String TAG = "MagneticData";
@@ -75,6 +77,10 @@ public class MagneticData extends AppCompatActivity implements SensorEventListen
             public void onClick(View view) {
                 Log.d(TAG, "onClick: "+TODOBRIANFIXTHIS.get(0)[0]);
                 Log.d(TAG, "onClick: "+ Arrays.deepToString(TODOBRIANFIXTHIS.toArray()));
+
+                Log.d(TAG,"onClick timestampes: " + timestamps.get(0)); //timestamp stuff
+                Log.d(TAG,"onClick timestampes"+Arrays.deepToString(timestamps.toArray()));
+
                 Snackbar.make(view, "Started magnetic stuff", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
 
@@ -91,7 +97,8 @@ public class MagneticData extends AppCompatActivity implements SensorEventListen
         //Log.d(TAG, "onSensorChanged: 0="+event.values[0]+" 1="+event.values[1]+" 2="+event.values[2]);
         float[] temp = {event.values[0],event.values[1],event.values[2]};
         TODOBRIANFIXTHIS.add(temp);// lord knows why I can't do this inline
-        Log.d("changed sensor","yes");
+        timestamps.add(System.currentTimeMillis()/1000);
+        //Log.d("changed sensor","yes");
     }
     public void onAccuracyChanged(Sensor event, int accuracy){
         Log.d(TAG, "onAccuracyChanged: "+accuracy);

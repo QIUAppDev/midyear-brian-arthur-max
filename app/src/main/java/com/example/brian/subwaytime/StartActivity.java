@@ -58,8 +58,8 @@ public class StartActivity extends AppCompatActivity {
         //TODO: add timestamp to each magnetic data option
         //TODO: link magnetism with wifi tracker in some way (perhaps make the switch continuous)
         //TODO: this means the the button shouldn't be the WIFI scanner, but should be MAGNETISM tracker
-        String test_id = UUID.randomUUID().toString();
-        Log.d("test_id",test_id);
+        final String id_persistent = PersistentID.get_id();
+        Log.d("id",id_persistent);
     }
 
 
