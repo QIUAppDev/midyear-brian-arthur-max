@@ -24,6 +24,8 @@ import static android.hardware.Sensor.TYPE_MAGNETIC_FIELD;
 
 public class MagneticData extends AppCompatActivity implements SensorEventListener {
 
+    //magnetic data (and corresponding) timestamps that get posted by user ID to firebase
+    //pushes to firebase every 10 seconds (i.e. when the unix timestamp is divisible by 10)
     public ArrayList<float[]> TODOBRIANFIXTHIS = new ArrayList<>();
     public ArrayList<Long> timestamps = new ArrayList<>();
 
@@ -94,10 +96,25 @@ public class MagneticData extends AppCompatActivity implements SensorEventListen
     }
 
     public void onSensorChanged(SensorEvent event){
+
+        //Problem: magnetic sensor detects changes multiple times/second
+        //solution: two requirements before a push to firebase is made: a) the timestamp value has changed,
+        //b) the timestamp value is divisible by 10 (i.e. every 10 seconds)
+
         //Log.d(TAG, "onSensorChanged: 0="+event.values[0]+" 1="+event.values[1]+" 2="+event.values[2]);
         float[] temp = {event.values[0],event.values[1],event.values[2]};
         TODOBRIANFIXTHIS.add(temp);// lord knows why I can't do this inline
         timestamps.add(System.currentTimeMillis()/1000);
+
+        //checks if a) timestamps size is at least 2, b)if an actual change of timestamp has occured, c) if it's 10 seconds
+        //TODO: a) push magnetic data par use to db, b) trigger wifi networks and scan
+        //TODO: INTEGRATE WIFI AND MAGNETISM
+        if(timestamps.size()>1){
+            if(!timestamps.get(timestamps.size()-1).equals(timestamps.get(timestamps.size()-2)) && timestamps.get(timestamps.size()-1)%10==0){
+                Log.d("push_to_firebase","10 seconds");
+            }
+        }
+
         //Log.d("changed sensor","yes");
     }
     public void onAccuracyChanged(Sensor event, int accuracy){
