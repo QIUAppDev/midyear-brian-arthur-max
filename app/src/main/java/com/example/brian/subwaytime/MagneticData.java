@@ -29,6 +29,7 @@ public class MagneticData extends AppCompatActivity implements SensorEventListen
     public ArrayList<float[]> TODOBRIANFIXTHIS = new ArrayList<>();
     public ArrayList<Long> timestamps = new ArrayList<>();
 
+    //magnetic stuff
     private SensorManager mSensorManager;
     private Sensor mSensor;
     private String TAG = "MagneticData";
@@ -96,10 +97,6 @@ public class MagneticData extends AppCompatActivity implements SensorEventListen
     }
 
     public void onSensorChanged(SensorEvent event){
-
-        //Problem: magnetic sensor detects changes multiple times/second
-        //solution: two requirements before a push to firebase is made: a) the timestamp value has changed,
-        //b) the timestamp value is divisible by 10 (i.e. every 10 seconds)
 
         //Log.d(TAG, "onSensorChanged: 0="+event.values[0]+" 1="+event.values[1]+" 2="+event.values[2]);
         float[] temp = {event.values[0],event.values[1],event.values[2]};
