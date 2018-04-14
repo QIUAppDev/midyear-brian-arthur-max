@@ -138,7 +138,7 @@ public class MagneticData extends AppCompatActivity implements SensorEventListen
         if(timestamps.size()>1){
             if(!timestamps.get(timestamps.size()-1).equals(timestamps.get(timestamps.size()-2)) && timestamps.get(timestamps.size()-1)%10==0){
                 String phone_id = PersistentID.get_id();
-                //myRef.child(phone_id).child("magnetic_data").setValue(TODOBRIANFIXTHIS);
+                myRef.child(phone_id).child("phone_id").setValue(phone_id);
                 myRef.child(phone_id).child("all_data").setValue(data_meshed);
                 Log.d("push_to_firebase","10 seconds");
             }
