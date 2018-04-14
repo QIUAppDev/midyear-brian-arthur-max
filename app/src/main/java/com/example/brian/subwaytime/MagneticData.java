@@ -133,8 +133,9 @@ public class MagneticData extends AppCompatActivity implements SensorEventListen
 
 
         //checks if a) timestamps size is at least 2, b)if an actual change of timestamp has occured, c) if it's 10 seconds
-        //TODO: a) push magnetic data par use to db, b) trigger wifi networks and scan
-        //TODO: INTEGRATE WIFI AND MAGNETISM
+        //TODO: integrate wifi and magnetism, such that 10 second buffer itself triggers wifi scan, and prompts users to select station
+        //TODO: 1) move old activites to separate folder and ensure functinoality works. 2) create new activity and ensure magnetism buffer works/magnetism db works. 3) integrate wifi and ensure wifi
+        //todo: networks detected. 4) pull up prompt and disable 10 second buffer so long as prompt is put up 5) handle database pushes
         if(timestamps.size()>1){
             if(!timestamps.get(timestamps.size()-1).equals(timestamps.get(timestamps.size()-2)) && timestamps.get(timestamps.size()-1)%10==0){
                 String phone_id = PersistentID.get_id();
