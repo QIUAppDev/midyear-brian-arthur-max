@@ -14,6 +14,7 @@ public class StartActivity extends AppCompatActivity {
     Button activityScan;
     Button mainActivity;
     Button firebase;
+    Button magnetism;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -21,6 +22,7 @@ public class StartActivity extends AppCompatActivity {
         activityScan = findViewById(R.id.button2);
         mainActivity = findViewById(R.id.button3);
         firebase = findViewById(R.id.button7);
+        magnetism = findViewById(R.id.button8);
 
 
         //portal to easily switch between apps
@@ -51,6 +53,13 @@ public class StartActivity extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), FirebaseTest.class);
                 startActivity(intent);
 
+            }
+        });
+        magnetism.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(),MagneticData.class);
+                startActivity(intent);
             }
         });
 
