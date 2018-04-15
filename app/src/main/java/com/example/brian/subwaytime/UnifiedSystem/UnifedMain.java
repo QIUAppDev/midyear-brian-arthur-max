@@ -38,7 +38,7 @@ import static android.hardware.Sensor.TYPE_MAGNETIC_FIELD;
 /*
 * a class that unifies magnetism and wifi into one activity
 * */
-public class UnifedMain extends AppCompatActivity implements SensorEventListener {
+public class UnifedMain extends AppCompatActivity implements SensorEventListener, StationFragment.StationFragmentListener {
 
     //for consistency, all declarations were made in the header
     //Exceptions: the Magnetism Sensors and the Wifi Sensors
@@ -139,7 +139,9 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
         mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
-
+    //this method runs whenever the magnetism sensor changes, and is where the brunt of the activity is
+    //1) the newest magnetic value fields/timestamps are recorded into data_meshed
+    //2) every 10 seconds, data_meshed is pushed to Firebase, new networks are picked up, and the user is given a Prompt to select a station name
     public void onSensorChanged(SensorEvent event){
 
         //Log.d(TAG, "onSensorChanged: 0="+event.values[0]+" 1="+event.values[1]+" 2="+event.values[2]);
@@ -249,7 +251,19 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
         dialog.show(getFragmentManager(), "test");
     }
 
+    //this method is run when the user taps OK
+    public void onDialogPositiveClick(DialogFragment dialog){
+        Log.d("userClick","postiive click");
+        menuOpen=false;
 
+    }
+    //this method is run when the user taps CANCEL
+    public void onDialogNegativeClick(DialogFragment dialog){
+        Log.d("userClick","negative click");
+
+        menuOpen=false;
+
+    }
 
 
 }
