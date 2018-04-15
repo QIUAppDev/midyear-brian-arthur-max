@@ -7,6 +7,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.net.wifi.WifiManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -20,6 +21,7 @@ import android.view.View;
 import com.example.brian.subwaytime.MagneticData;
 import com.example.brian.subwaytime.PersistentID;
 import com.example.brian.subwaytime.R;
+import com.example.brian.subwaytime.derpwork;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -35,27 +37,40 @@ import static android.hardware.Sensor.TYPE_MAGNETIC_FIELD;
 * */
 public class UnifedMain extends AppCompatActivity implements SensorEventListener {
 
-    //magnetic data (and corresponding) timestamps that get posted by user ID to firebase
-    //pushes to firebase every 10 seconds (i.e. when the unix timestamp is divisible by 10)
-    public List<float[]> TODOBRIANFIXTHIS = new ArrayList(); //legacy holder
+    //for consistency, all declarations were made in the header
+    //Exceptions: the Magnetism Sensors and the Wifi Sensors
+
+    //magnetism data structures
+    public List<float[]> TODOBRIANFIXTHIS = new ArrayList(); //maintained for legacy support
     public List<Long> timestamps = new ArrayList();
     public HashMap<String,List<Float>> data_meshed = new HashMap<>(); //format that is pushed to Firebase
 
-    //magnetic stuff
+    //magnetic sensors
+    //NOTE: Android gave me an error when I tried moving its instantiation here, so it remains in onCreate
     private SensorManager mSensorManager;
     private Sensor mSensor;
-    private String TAG = "MagneticData";
+    private String TAG = "UnifedMain";
 
-    //FIREBASE stuff
-    //a different point of reference will be accessed than FirebaseTest to post users
-    private FirebaseDatabase database;
-    private DatabaseReference myRef;
+    //wifi sensors
+    WifiManager mainwifi;
+
+    //Firebase database (only exception to DatabaseStuff)
+    private FirebaseDatabase database= FirebaseDatabase.getInstance();
+    private DatabaseReference myRef= database.getReference();
+
+    //DatabaseStuff
+    DatabaseStuff control = new DatabaseStuff(this);
+
+    //set true if wifi networks have been pulled and are being labeled by the user
+    //during this time, no pushes/wifi scans are performed while the user is making choices
+    private boolean menuOpen = false;
 
 
     //    https://developer.android.com/guide/topics/sensors/sensors_motion.html#sensors-motion-accel
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //just a little something spliced into it for testing. Probably can stay
+
+        //asks for location/sensor permissions
         int REQUEST_CODE = 1;
         if(!(ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED)){
@@ -71,11 +86,12 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
             Log.d("permissions","denied, something sent wrong");
         }
 
-        //initialize the references
+        //initialize the Wifi Sensor
+        mainwifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+        //initialize the Magnetism Sensors
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-
-
 
         //check if the user is actually running magnetometer
         String out = mSensorManager.getSensorList(TYPE_MAGNETIC_FIELD).toString();
@@ -84,11 +100,15 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
             //user has no magnetometer. This is an issue. TODO
         }
 
-
-
-
+        //inits activity layout
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_data_get);
+        setContentView(R.layout.activity_unifed_main);
+
+        /*
+
+        old code for the bottom toolbar that was displaced for the new UI
+        TODOBRIANTHIS is kept so this code remains usable
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -107,17 +127,15 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
 
 
             }
-        });
+        });*/
 
-        //init the firebase
-        //getReference changes the "database mode" such that the "users" tree is edited, not the wifi networks
-        database = FirebaseDatabase.getInstance();
-        myRef = database.getReference("users");
+
     }
     protected void onResume(){
         super.onResume();
         mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
+
 
     public void onSensorChanged(SensorEvent event){
 
@@ -126,7 +144,6 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
         float[] temp = {event.values[0],event.values[1],event.values[2]}; //kept to keep button working, will be removed later
         TODOBRIANFIXTHIS.add(temp);// lord knows why I can't do this inline
         timestamps.add(System.currentTimeMillis()/1000); //kept to ensure 10 second buffer works
-
 
         //NEW SYSTEM: assemble raw magnetic values into List, then append List into HashMap (paired with corresponding timestamp) for pushing to Firebase
         List<Float> temp_list = new ArrayList(); //temp except as a List (for pushing to firebase)
@@ -140,14 +157,25 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
 
         //checks if a) timestamps size is at least 2, b)if an actual change of timestamp has occured, c) if it's 10 seconds
         //TODO: integrate wifi and magnetism, such that 10 second buffer itself triggers wifi scan, and prompts users to select station
-        //TODO: 1) move old activites to separate folder and ensure functinoality works. 2) create new activity and ensure magnetism buffer works/magnetism db works. 3) integrate wifi and ensure wifi
+        //TODO: 1) move old activites to separate folder and ensure functinoality works. [DONE]
+        //TODO 2) create new activity and ensure magnetism buffer works/magnetism db works.
+        // TODO: 3) integrate wifi and ensure wifi
         //todo: networks detected. 4) pull up prompt and disable 10 second buffer so long as prompt is put up 5) handle database pushes
         if(timestamps.size()>1){
-            if(!timestamps.get(timestamps.size()-1).equals(timestamps.get(timestamps.size()-2)) && timestamps.get(timestamps.size()-1)%10==0){
+            if(!timestamps.get(timestamps.size()-1).equals(timestamps.get(timestamps.size()-2)) && timestamps.get(timestamps.size()-1)%10==0 && menuOpen==false){
+                menuOpen = true;
+
+                //pushes magnetic data to db
                 String phone_id = PersistentID.get_id();
-                myRef.child(phone_id).child("phone_id").setValue(phone_id);
-                myRef.child(phone_id).child("all_data").setValue(data_meshed);
+                myRef.child("users").child(phone_id).child("phone_id").setValue(phone_id);
+                myRef.child("users").child(phone_id).child("all_data").setValue(data_meshed);
                 Log.d("push_to_firebase","10 seconds");
+
+                if(pullWifi().size()!=0){
+                    Log.d("update","new networks!");
+
+                }
+                menuOpen=false;
             }
         }
 
@@ -155,6 +183,37 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
     }
     public void onAccuracyChanged(Sensor event, int accuracy){
         Log.d(TAG, "onAccuracyChanged: "+accuracy);
+
+    }
+
+    public ArrayList<derpwork> pullWifi(){//runs a wifi scan and returns an array of local networks NOT indexed in database
+        ArrayList<derpwork> fresh_wifi = new ArrayList<>();
+        if(mainwifi.startScan()){
+            for (android.net.wifi.ScanResult i : mainwifi.getScanResults()) {
+                String[] input = i.toString().split(",", -1);
+
+                //initiates and appends to wifi network
+                derpwork testDerpwork = new derpwork();
+                testDerpwork.setName(input[0]); //STATION name, not NETWORK NAME (will be fixed upon user selection)
+                testDerpwork.setSsid(input[0]); //this refers to the NETWORK NAME
+                testDerpwork.setMac(input[1]);
+                //sub-details
+                testDerpwork.setCapabilities(input[2]);
+                testDerpwork.setLevel(input[3]);
+                testDerpwork.setFrequency(input[4]);
+                testDerpwork.setTimestamp(input[5]);
+                testDerpwork.setDistance(input[6]);
+                testDerpwork.setDistanceSD(input[7]);
+                testDerpwork.setPasspoint(input[8]);
+
+                //appends fresh network to list if not in database
+                if(control.search(testDerpwork).size()==0){
+                    fresh_wifi.add(testDerpwork);
+                }
+            }
+        }
+
+        return fresh_wifi;
 
     }
 
