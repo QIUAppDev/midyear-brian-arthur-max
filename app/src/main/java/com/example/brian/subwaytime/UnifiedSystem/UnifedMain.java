@@ -160,9 +160,16 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
         //checks if a) timestamps size is at least 2, b)if an actual change of timestamp has occured, c) if it's 10 seconds
         //TODO: integrate wifi and magnetism, such that 10 second buffer itself triggers wifi scan, and prompts users to select station
         //TODO: 1) move old activites to separate folder and ensure functinoality works. [DONE]
-        //TODO 2) create new activity and ensure magnetism buffer works/magnetism db works.
-        // TODO: 3) integrate wifi and ensure wifi
-        //todo: networks detected. 4) pull up prompt and disable 10 second buffer so long as prompt is put up 5) handle database pushes
+        //TODO 2) create new activity and ensure magnetism buffer works/magnetism db works. [DONE]
+        // TODO: 3) integrate wifi and ensure wifi networks detected. [DONE]
+        // TODO: 4) pull up prompt and disable 10 second buffer so long as prompt is put up [DONE]
+        // TODO: 5) display list of stations to select from/wifi networks?
+        //TODO: 6) log new wifi networks (WITH STATION NAME) into Room [DONE, PENDING TESTING]
+        //TODO: 7) pull and push to Firebase: a) to net wifi system and b) to user profile
+        //TODO: 8) write up comment listing entire procedure
+        //TODO: 9) write up POC for Arthur to access raw magnetic data
+
+        //IMMEDIATE TODO: a) past added wifi networks still register, b) firebase
         if(timestamps.size()>1){
             if(!timestamps.get(timestamps.size()-1).equals(timestamps.get(timestamps.size()-2)) && timestamps.get(timestamps.size()-1)%10==0 && menuOpen==false){
                 menuOpen = true;
@@ -178,6 +185,17 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
                 if(fresh_wifi.size()!=0){
                     Log.d("update","new networks!");
                     promptStations();
+
+                    String station_name = "test_station_name"; //temporary station name that will be replaced by user choice from promptStations()
+
+                    control.addRoomDB(fresh_wifi,station_name);
+                    control.printRoomDB();
+                    control.firebasePullPush();
+
+                    //TODO: extract user choice of station name from prompt
+                    //TODO: make station name that selected choice
+                    //TODO: push wifi networks to database
+                    //TODO: sync, merge, and push to firebase
 
                 }
 
