@@ -3,6 +3,7 @@ package com.example.brian.subwaytime.UnifiedSystem;
 import android.app.Application;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.example.brian.subwaytime.AppDatabase;
 import com.example.brian.subwaytime.derpwork;
@@ -38,6 +39,20 @@ public class DatabaseStuff {
             }
         }.execute();
         return output;
+    }
+
+    //prints all entries in the database
+    public void printDB(){
+        new AsyncTask<Void,Void,Void>(){
+            protected Void doInBackground(Void...params){
+                List<derpwork> all_networks = appDatabase.networkDao().getAll_nonLiveData();
+                for(derpwork network : all_networks){
+                    Log.d("printDB","SSID: " + network.getSsid() + ", MAC: " + network.getMac());
+                }
+                Log.d("printDB_size",Integer.toString(appDatabase.networkDao().getCount()));
+                return null;
+            }
+        }.execute();
     }
 
 

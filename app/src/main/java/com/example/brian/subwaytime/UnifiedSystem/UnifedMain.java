@@ -1,7 +1,9 @@
 package com.example.brian.subwaytime.UnifiedSystem;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -153,7 +155,7 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
 
         data_meshed.put(timestamps.get(timestamps.size()-1).toString(),temp_list); //note: timestamp is converted to string to comply with firebase standards
 
-
+        //control.printDB();
 
         //checks if a) timestamps size is at least 2, b)if an actual change of timestamp has occured, c) if it's 10 seconds
         //TODO: integrate wifi and magnetism, such that 10 second buffer itself triggers wifi scan, and prompts users to select station
@@ -171,11 +173,14 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
                 myRef.child("users").child(phone_id).child("all_data").setValue(data_meshed);
                 Log.d("push_to_firebase","10 seconds");
 
-                if(pullWifi().size()!=0){
+                ArrayList<derpwork> fresh_wifi = pullWifi();
+
+                if(fresh_wifi.size()!=0){
                     Log.d("update","new networks!");
+                    promptStations();
 
                 }
-                menuOpen=false;
+
             }
         }
 
@@ -186,7 +191,8 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
 
     }
 
-    public ArrayList<derpwork> pullWifi(){//runs a wifi scan and returns an array of local networks NOT indexed in database
+    //runs a wifi scan and returns an array of local networks NOT indexed in database
+    public ArrayList<derpwork> pullWifi(){
         ArrayList<derpwork> fresh_wifi = new ArrayList<>();
         if(mainwifi.startScan()){
             for (android.net.wifi.ScanResult i : mainwifi.getScanResults()) {
@@ -214,6 +220,26 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
         }
 
         return fresh_wifi;
+
+    }
+
+    //When called, a prompt is summoned that requires the user to select a subway station
+    //during this time, menuOpen is set as TRUE, ensuring no additional networks are requested while the user making up his mind
+    public void promptStations(){
+
+        //a test dialog that will be replaced later
+        AlertDialog.Builder sample_builder = new AlertDialog.Builder(this);
+        sample_builder.setMessage("This is a sample prompt. No new networks should be scanned while this prompt is up");
+        sample_builder.setCancelable(true);
+        sample_builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+                menuOpen=false;
+            }
+        });
+        AlertDialog alert = sample_builder.create();
+        alert.show();
 
     }
 
