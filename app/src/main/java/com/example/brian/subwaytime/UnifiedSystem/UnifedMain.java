@@ -54,8 +54,12 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
     private Sensor mSensor;
     private String TAG = "UnifedMain";
 
-    //wifi sensors
+    //wifi sensors and data structures
     WifiManager mainwifi;
+    //updated every 10 seconds only when menuOpen = false.
+    //fresh_wifi is declared here so onDialogPositiveClick can access it
+    ArrayList<derpwork> fresh_wifi;
+
 
     //Firebase database (only exception to DatabaseStuff)
     private FirebaseDatabase database= FirebaseDatabase.getInstance();
@@ -183,24 +187,14 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
                 myRef.child("users").child(phone_id).child("all_data").setValue(data_meshed);
                 Log.d("push_to_firebase","10 seconds");
 
-                ArrayList<derpwork> fresh_wifi = pullWifi();
-
+                //gets fresh networks not in db, and pulls up the prompt
+                //TODO: uniqueness bug
+                fresh_wifi = pullWifi();
                 if(fresh_wifi.size()!=0){
                     Log.d("update","new networks!");
                     promptStations();
-
-                    /*String station_name = "test_station_name"; //temporary station name that will be replaced by user choice from promptStations()
-                    control.addRoomDB(fresh_wifi,station_name);
-                    control.printRoomDB();
-                    control.firebasePullPush();*/
-
-
-                    //TODO: extract user choice of station name from prompt
-                    //TODO: make station name that selected choice
-                    //TODO: push wifi networks to database
-                    //TODO: sync, merge, and push to firebase
-
                 }
+                menuOpen=false;
 
             }
         }
@@ -219,10 +213,13 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
             for (android.net.wifi.ScanResult i : mainwifi.getScanResults()) {
                 String[] input = i.toString().split(",", -1);
 
-                //initiates and appends to wifi network
+                //initiates network
                 derpwork testDerpwork = new derpwork();
-                testDerpwork.setName(input[0]); //STATION name, not NETWORK NAME (will be fixed upon user selection)
-                testDerpwork.setSsid(input[0]); //this refers to the NETWORK NAME
+
+                //setName refers to STATION name. will be replaced with user selection from dialog
+                testDerpwork.setName(input[0]);
+                //setSSID refers to NETWORK name
+                testDerpwork.setSsid(input[0]);
                 testDerpwork.setMac(input[1]);
                 //sub-details
                 testDerpwork.setCapabilities(input[2]);
@@ -233,7 +230,11 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
                 testDerpwork.setDistanceSD(input[7]);
                 testDerpwork.setPasspoint(input[8]);
 
+                Log.d("mac adddres", testDerpwork.getMac());
+
                 //appends fresh network to list if not in database
+                //TODO: this doesn't work
+                ;
                 if(control.search(testDerpwork).size()==0){
                     fresh_wifi.add(testDerpwork);
                 }
@@ -252,7 +253,16 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
     }
 
     //this method is run when the user taps OK
+    //this method is also where UnifedMain pushes to the DBs
     public void onDialogPositiveClick(DialogFragment dialog){
+        //temporary station name that will be replaced by user choice from promptStations()
+        String station_name = "test_station_name";
+
+        //database stuff
+        control.addRoomDB(fresh_wifi,station_name);
+        control.printRoomDB();
+        control.firebasePullPush();
+
         Log.d("userClick","postiive click");
         menuOpen=false;
 
