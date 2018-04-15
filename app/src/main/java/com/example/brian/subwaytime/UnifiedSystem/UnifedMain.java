@@ -2,6 +2,7 @@ package com.example.brian.subwaytime.UnifiedSystem;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
@@ -186,11 +187,11 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
                     Log.d("update","new networks!");
                     promptStations();
 
-                    String station_name = "test_station_name"; //temporary station name that will be replaced by user choice from promptStations()
-
+                    /*String station_name = "test_station_name"; //temporary station name that will be replaced by user choice from promptStations()
                     control.addRoomDB(fresh_wifi,station_name);
                     control.printRoomDB();
-                    control.firebasePullPush();
+                    control.firebasePullPush();*/
+
 
                     //TODO: extract user choice of station name from prompt
                     //TODO: make station name that selected choice
@@ -244,22 +245,11 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
     //When called, a prompt is summoned that requires the user to select a subway station
     //during this time, menuOpen is set as TRUE, ensuring no additional networks are requested while the user making up his mind
     public void promptStations(){
-
-        //a test dialog that will be replaced later
-        AlertDialog.Builder sample_builder = new AlertDialog.Builder(this);
-        sample_builder.setMessage("This is a sample prompt. No new networks should be scanned while this prompt is up");
-        sample_builder.setCancelable(true);
-        sample_builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.cancel();
-                menuOpen=false;
-            }
-        });
-        AlertDialog alert = sample_builder.create();
-        alert.show();
-
+        DialogFragment dialog = new StationFragment();
+        dialog.show(getFragmentManager(), "test");
     }
+
+
 
 
 }
