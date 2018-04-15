@@ -37,6 +37,23 @@ import static android.hardware.Sensor.TYPE_MAGNETIC_FIELD;
 
 /*
 * a class that unifies magnetism and wifi into one activity
+*
+* PROCEDURE:
+* 1) requests for permissions is made
+* 2) the magnetism stuff is added and recorded
+* 3) every 10 seconds, the recorded magnetic data is pushed to the phone's user profile on Firebase.
+* 4) a wifi scan is made and searches for any new wifi networks that are not in the phone's local Room DB
+* 5) if there is, a dialog displays that requests the user to label the networks with a station name.
+* during this time, NO ADDITIONAL WIFI SCANS ARE MADE.
+* 6) when the user taps OK, the dialog goes away, the new wifi networks are updated with the desired station name, and entered into the Room database.
+* 7) these new wifi networks (now in Room DB) are pushed to the phone's user profile on Firebase
+* 8) the existing wifi database on Firebase is pulled, appended to the phone's local DB, and re-sent back to Firebase.
+* 9) Firebase's wifi network database is pulled and entered into the Phone's local DB
+* 10) the app is ready to scan again after 10 more seconds for the next newest wifi networks
+*
+* PROBLEM:
+* the app stops suddenly when step 9 concludes without any exceptions
+* the prompt needs to formally request the station name for the networks
 * */
 public class UnifedMain extends AppCompatActivity implements SensorEventListener, StationFragment.StationFragmentListener {
 
@@ -171,10 +188,8 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
         // TODO: 3) integrate wifi and ensure wifi networks detected. [DONE]
         // TODO: 4) pull up prompt and disable 10 second buffer so long as prompt is put up [DONE]
         // TODO: 5) display list of stations to select from/wifi networks?
-        //TODO: 6) log new wifi networks (WITH STATION NAME) into Room [DONE, PENDING TESTING]
-        //TODO: 7) pull and push to Firebase: a) to net wifi system and b) to user profile
-        //TODO: 8) write up comment listing entire procedure
-        //TODO: 9) write up POC for Arthur to access raw magnetic data
+        //TODO: 6) log new wifi networks (WITH STATION NAME) into Room [DONE]
+        //TODO: 7) pull and push to Firebase: a) to net wifi system and b) to user profile [DONE, WITH BUGS]
 
         //IMMEDIATE TODO: a) past added wifi networks still register, b) firebase
         if(timestamps.size()>1){

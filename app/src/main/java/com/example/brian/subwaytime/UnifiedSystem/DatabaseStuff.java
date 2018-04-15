@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.example.brian.subwaytime.AppDatabase;
+import com.example.brian.subwaytime.PersistentID;
 import com.example.brian.subwaytime.derpwork;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -26,12 +27,18 @@ public class DatabaseStuff implements OnTaskCompleted{
     * -ideally, all asynctasks should be made here
     * */
 
+    //Room
     private final AppDatabase appDatabase;
 
+    //Firebase
     private FirebaseDatabase database= FirebaseDatabase.getInstance();
     private DatabaseReference myRef= database.getReference();
 
+    //required for AsyncTask
     Context con;
+
+    //unique app id
+    String phone_id = PersistentID.get_id();
 
     public DatabaseStuff(Context context){
         con = context;
@@ -43,11 +50,12 @@ public class DatabaseStuff implements OnTaskCompleted{
 
         List<derpwork> output = new ArrayList<>();
 
+        //instantiates async task and directly grabs data
         SearchAsync async_search = new SearchAsync(con, network);
         async_search.setListener(this);
         try{
             output = async_search.execute().get();
-        } catch(ExecutionException | InterruptedException e){
+        } catch(ExecutionException | InterruptedException e){ //exception handling Android requires
             Log.e("async","failed");
         }
 
@@ -56,7 +64,8 @@ public class DatabaseStuff implements OnTaskCompleted{
         return output;
     }
 
-    //when the AsyncTask is completed, this method runs and assigns wifi_search_results the latest results
+    //this method is invoked when the AsyncTask finishes
+    //NOTE: DEPRECIATED
     public void onTaskCompleted(List<derpwork> results){ }
 
     //prints all entries in the Room database
@@ -92,9 +101,10 @@ public class DatabaseStuff implements OnTaskCompleted{
 
         //connects to the net wifi section on Firebase
         myRef = database.getReference("message");
-        pushFirebase();
-        pullFirebase();
         userPushFirebase();
+        pushFirebase();
+
+        pullFirebase();
 
     }
 
@@ -170,7 +180,7 @@ public class DatabaseStuff implements OnTaskCompleted{
                     wifi_push.put(network.getMac(), network);
                 }
 
-                //downloads existing data, appends, and pushes
+                //downloads existing data, appends local DB, and pushes
                 myRef.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -193,20 +203,24 @@ public class DatabaseStuff implements OnTaskCompleted{
             }
         }.execute();
 
-
-        //wifi_push.put("station_1",test_network);
-
-        //myRef.child("station_1").setValue(test_network);
-
-
-
-
-
+        Log.d("testaa","we get here");
     }
 
-    //pushes
+    //pushes room DB to user profile on Firebase
+    //by being run first, the Room DB at this point already represents the new wifi networks
     public void userPushFirebase(){
+        new AsyncTask<Void,Void,Void>(){
+            protected Void doInBackground(Void...params){
+                myRef = database.getReference("users");
+                HashMap<String, derpwork> user_wifi_push = new HashMap<>();
 
+                for(derpwork network : appDatabase.networkDao().getAll_nonLiveData()){
+                    user_wifi_push.put(network.getMac(),network);
+                }
+                myRef.child(phone_id).child("wifi_networks").setValue(user_wifi_push);
+                return null;
+            }
+        }.execute();
     }
 
 }
@@ -222,8 +236,10 @@ class SearchAsync extends AsyncTask<List<derpwork>,Void,List<derpwork>>{
     //carries over listener from OnTaskCompleted
     private OnTaskCompleted listener;
 
+    //Room persistence DB
     private final AppDatabase appDatabase;
 
+    //prospective network that's being searched
     private derpwork network;
 
     public SearchAsync(Context context, derpwork net){
@@ -231,6 +247,7 @@ class SearchAsync extends AsyncTask<List<derpwork>,Void,List<derpwork>>{
         network=net;
     }
 
+    //instantiates listener
     public void setListener(OnTaskCompleted listen){
         listener=listen;
     }
@@ -240,12 +257,6 @@ class SearchAsync extends AsyncTask<List<derpwork>,Void,List<derpwork>>{
     protected List<derpwork> doInBackground(List<derpwork>...params){
         List<derpwork> output_similar = appDatabase.networkDao().station_query_mac_nonLiveData(network.getMac());
         return output_similar;
-
-        /*for(derpwork net : output_similar){
-            output.add(net);
-            Log.d("output",Integer.toString(output.size()));
-        }
-        return output;*/
     }
 
     //this method runs when doInBackground finishes, and passes the search results back to DatabaseStuff
