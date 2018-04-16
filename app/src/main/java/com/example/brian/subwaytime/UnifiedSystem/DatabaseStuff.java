@@ -28,7 +28,7 @@ public class DatabaseStuff implements OnTaskCompleted{
     * */
 
     //Room
-    private final AppDatabase appDatabase;
+    public final AppDatabase appDatabase;
 
     //Firebase
     private FirebaseDatabase database= FirebaseDatabase.getInstance();
@@ -42,7 +42,7 @@ public class DatabaseStuff implements OnTaskCompleted{
 
     public DatabaseStuff(Context context){
         con = context;
-        appDatabase = AppDatabase.getDatabase(context);
+        appDatabase = AppDatabase.getDatabase(context); //inits sql db
     }
 
     //given a single network, returns a List of networks whose MAC addresses match on the Room DB
@@ -252,7 +252,7 @@ class SearchAsync extends AsyncTask<List<derpwork>,Void,List<derpwork>>{
         listener=listen;
     }
 
-    //this method runs in the background and does the Room DB search
+    //this method runs in the background and does the Room DB search, returning similarities between the network passed in and the user's local Room DB
     @Override
     protected List<derpwork> doInBackground(List<derpwork>...params){
         List<derpwork> output_similar = appDatabase.networkDao().station_query_mac_nonLiveData(network.getMac());

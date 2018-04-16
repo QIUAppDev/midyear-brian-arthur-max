@@ -21,6 +21,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 
+import com.example.brian.subwaytime.AppDatabase;
 import com.example.brian.subwaytime.MagneticData;
 import com.example.brian.subwaytime.PersistentID;
 import com.example.brian.subwaytime.R;
@@ -63,10 +64,11 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
     //magnetism data structures
     public List<float[]> TODOBRIANFIXTHIS = new ArrayList(); //maintained for legacy support
     public List<Long> timestamps = new ArrayList();
-    public HashMap<String,List<Float>> data_meshed = new HashMap<>(); //format that is pushed to Firebase
+    public HashMap<String,List> data_meshed = new HashMap<>(); //format that is pushed to Firebase
 
     //magnetic sensors
     //NOTE: Android gave me an error when I tried moving its instantiation here, so it remains in onCreate
+    //1 ^ That would be because that'd be a null pointer, you can't init android stuff ddd
     private SensorManager mSensorManager;
     private Sensor mSensor;
     private String TAG = "UnifedMain";
@@ -84,10 +86,12 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
 
     //DatabaseStuff
     DatabaseStuff control = new DatabaseStuff(this);
+    AppDatabase appDatabase = control.appDatabase;
 
     //set true if wifi networks have been pulled and are being labeled by the user
     //during this time, no pushes/wifi scans are performed while the user is making choices
     private boolean menuOpen = false;
+
 
 
     //    https://developer.android.com/guide/topics/sensors/sensors_motion.html#sensors-motion-accel
@@ -99,7 +103,7 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
         if(!(ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED)){
             //if perms aren't granted, we ask
-            ActivityCompat.requestPermissions(UnifedMain.this,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},REQUEST_CODE); //TODO whats a request code?
+            ActivityCompat.requestPermissions(UnifedMain.this,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},REQUEST_CODE);
 
         }
         if(ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -172,10 +176,11 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
         timestamps.add(System.currentTimeMillis()/1000); //kept to ensure 10 second buffer works
 
         //NEW SYSTEM: assemble raw magnetic values into List, then append List into HashMap (paired with corresponding timestamp) for pushing to Firebase
-        List<Float> temp_list = new ArrayList(); //temp except as a List (for pushing to firebase)
+        List temp_list = new ArrayList(); //temp except as a List (for pushing to firebase)
         temp_list.add(event.values[0]);
         temp_list.add(event.values[1]);
         temp_list.add(event.values[2]);
+        temp_list.add(mainwifi.getScanResults());
 
         data_meshed.put(timestamps.get(timestamps.size()-1).toString(),temp_list); //note: timestamp is converted to string to comply with firebase standards
 
@@ -221,6 +226,8 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
 
     }
 
+
+
     //runs a wifi scan and returns an array of local networks NOT indexed in database
     public ArrayList<derpwork> pullWifi(){
         ArrayList<derpwork> fresh_wifi = new ArrayList<>();
@@ -245,11 +252,20 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
                 testDerpwork.setDistanceSD(input[7]);
                 testDerpwork.setPasspoint(input[8]);
 
-                Log.d("mac adddres", testDerpwork.getMac());
+                Log.d("mac address", testDerpwork.getMac());
+
+                if(appDatabase.networkDao().station_query_mac_nonLiveData(testDerpwork.getMac()).size()==0){
+                                appDatabase.networkDao().insertAll(testDerpwork);
+                }
+                else {
+                    Log.e("network already here","The network called " + testDerpwork.getSsid() + "is already in the db, so it wasn't added");
+                }
+
 
                 //appends fresh network to list if not in database
                 //TODO: this doesn't work
-                ;
+                //it should now
+
                 if(control.search(testDerpwork).size()==0){
                     fresh_wifi.add(testDerpwork);
                 }
@@ -266,6 +282,7 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
         DialogFragment dialog = new StationFragment();
         dialog.show(getFragmentManager(), "test");
     }
+
 
     //this method is run when the user taps OK
     //this method is also where UnifedMain pushes to the DBs

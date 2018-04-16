@@ -22,7 +22,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
-    private ResultViewModel viewModel; //interacts with database (i.e. makes the necssary queries)
+    private ResultViewModel viewModel; //interacts with database (i.e. makes the necessary queries)
     private RecyclerViewAdapter recyclerViewAdapter; //the middleman between the recyclerview front-end and the backend
     private RecyclerView recyclerView;
 
@@ -51,7 +51,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        //TODO make the sql database that holds all the data we have
 
         //test stuff here
             final WifiManager manager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -69,9 +68,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 String temp = "user changed text to:"+usrQueryObj.getText().toString();
                 Log.d("aaaagh",temp);
                 //works^
-                WifiInfo info = manager.getConnectionInfo();
-                Log.d("wifiinfo", info.toString());
-
 
                 //this is the part I added
                 String query = usrQueryObj.getText().toString();
