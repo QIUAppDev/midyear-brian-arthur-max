@@ -15,18 +15,12 @@ import com.example.brian.subwaytime.R;
 
 public class UnifedMainStart extends AppCompatActivity {
 
-    private Button startUnifedMain = findViewById(R.id.button9);
+    private Button startUnifedMain;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        startUnifedMain.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(),UnifedMain.class);
-                startActivity(intent);
-            }
-        });
+
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_unifed_main_start);
@@ -48,5 +42,14 @@ public class UnifedMainStart extends AppCompatActivity {
         }
 
         Log.d("async test","it's running");
+
+        startUnifedMain = findViewById(R.id.button9);
+        startUnifedMain.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(),UnifedMain.class);
+                startActivity(intent);
+            }
+        });
     }
 }
