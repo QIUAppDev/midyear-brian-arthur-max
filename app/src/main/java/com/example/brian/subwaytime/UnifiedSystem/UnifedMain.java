@@ -167,7 +167,9 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
         temp_list.add(event.values[0]);
         temp_list.add(event.values[1]);
         temp_list.add(event.values[2]);
-        temp_list.add(mainwifi.getScanResults());
+        temp_list.add(Arrays.deepToString(mainwifi.getScanResults().toArray()));
+
+
 
 
 
@@ -195,7 +197,7 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
                 //pushes magnetic data to db
                 String phone_id = PersistentID.get_id();
                 myRef.child("users").child(phone_id).child("phone_id").setValue(phone_id);
-                 .myRef.child("users").child(phone_id).child("all_data").setValue(data_meshed);
+                myRef.child("users").child(phone_id).child("all_data").setValue(data_meshed);
                 Log.d("push_to_firebase","10 seconds");
 
                 //gets fresh networks not in db, and pulls up the prompt
