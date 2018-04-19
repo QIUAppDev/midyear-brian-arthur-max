@@ -66,6 +66,7 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
     public List<Long> timestamps = new ArrayList();
     public HashMap<String,List> data_meshed = new HashMap<>(); //format that is pushed to Firebase
 
+
     //magnetic sensors
     //NOTE: Android gave me an error when I tried moving its instantiation here, so it remains in onCreate
     //1 ^ That would be because that'd be a null pointer, you can't init android stuff ddd
@@ -98,21 +99,7 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        //asks for location/sensor permissions
-        int REQUEST_CODE = 1;
-        if(!(ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED)){
-            //if perms aren't granted, we ask
-            ActivityCompat.requestPermissions(UnifedMain.this,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},REQUEST_CODE);
 
-        }
-        if(ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED){
-            Log.d("permissions","permissions granted!");
-        }
-        else{
-            Log.d("permissions","denied, something sent wrong");
-        }
 
         //initialize the Wifi Sensor
         mainwifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -182,8 +169,12 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
         temp_list.add(event.values[2]);
         temp_list.add(mainwifi.getScanResults());
 
-        data_meshed.put(timestamps.get(timestamps.size()-1).toString(),temp_list); //note: timestamp is converted to string to comply with firebase standards
 
+
+        Log.d("temp_list", temp_list.toString());
+
+        data_meshed.put(timestamps.get(timestamps.size()-1).toString(),temp_list); //note: timestamp is converted to string to comply with firebase standards
+        Log.d("print setup","complete");
         //control.printDB();
 
         //checks if a) timestamps size is at least 2, b)if an actual change of timestamp has occured, c) if it's 10 seconds
@@ -204,7 +195,7 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
                 //pushes magnetic data to db
                 String phone_id = PersistentID.get_id();
                 myRef.child("users").child(phone_id).child("phone_id").setValue(phone_id);
-                myRef.child("users").child(phone_id).child("all_data").setValue(data_meshed);
+                //myRef.child("users").child(phone_id).child("all_data").setValue(data_meshed);
                 Log.d("push_to_firebase","10 seconds");
 
                 //gets fresh networks not in db, and pulls up the prompt
