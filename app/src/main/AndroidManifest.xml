@@ -31,10 +31,10 @@
             android:theme="@style/AppTheme" />
         <activity android:name=".GraphTest" />
         <activity android:name=".FirebaseTest" />
-        <activity android:name=".UnifiedSystem.UnifedMain">
+        <activity android:name=".UnifiedSystem.UnifiedMain">
 
         </activity>
-        <activity android:name=".UnifiedSystem.UnifedMainStart">
+        <activity android:name=".UnifiedSystem.UnifiedMainStart">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

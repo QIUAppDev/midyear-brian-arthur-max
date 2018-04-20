@@ -13,7 +13,7 @@ import android.widget.Button;
 
 import com.example.brian.subwaytime.R;
 
-public class UnifedMainStart extends AppCompatActivity {
+public class UnifiedMainStart extends AppCompatActivity {
 
     private Button startUnifedMain;
 
@@ -30,7 +30,7 @@ public class UnifedMainStart extends AppCompatActivity {
         if(!(ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED)){
             //if perms aren't granted, we ask
-            ActivityCompat.requestPermissions(UnifedMainStart.this,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},REQUEST_CODE);
+            ActivityCompat.requestPermissions(UnifiedMainStart.this,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},REQUEST_CODE);
 
         }
         if(ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -47,7 +47,7 @@ public class UnifedMainStart extends AppCompatActivity {
         startUnifedMain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(),UnifedMain.class);
+                Intent intent = new Intent(getApplicationContext(),UnifiedMain.class);
                 startActivity(intent);
             }
         });

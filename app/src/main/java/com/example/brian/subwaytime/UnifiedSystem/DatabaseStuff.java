@@ -29,6 +29,7 @@ public class DatabaseStuff implements OnTaskCompleted{
 
     //Room
     public final AppDatabase appDatabase;
+    public final AppDatabase WifiDatabase;
 
     //Firebase
     private FirebaseDatabase database= FirebaseDatabase.getInstance();
@@ -43,6 +44,7 @@ public class DatabaseStuff implements OnTaskCompleted{
     public DatabaseStuff(Context context){
         con = context;
         appDatabase = AppDatabase.getDatabase(context); //inits sql db
+        WifiDatabase = AppDatabase.getLocalWifiDatabase(context); //does the wifi thing
     }
 
     //given a single network, returns a List of networks whose MAC addresses match on the Room DB

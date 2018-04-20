@@ -13,13 +13,17 @@ import java.util.List;
  */
 
 public class ResultViewModel extends AndroidViewModel {
-    private MutableLiveData<List<derpwork>> output_list;
+    private MutableLiveData<List<derpwork>> output_list, wifi_list;
 
     private AppDatabase appDatabase; //instantiates database
+    private AppDatabase WifiDatabase;
 
     public ResultViewModel(Application application){
         super(application);
         appDatabase = AppDatabase.getDatabase(this.getApplication());
+        WifiDatabase = AppDatabase.getLocalWifiDatabase(this.getApplication());
+        wifi_list = new MutableLiveData<List<derpwork>>();
+        wifi_list.setValue(WifiDatabase.networkDao().getAll_nonLiveData());
         output_list = new MutableLiveData<List<derpwork>>();
         output_list.setValue(appDatabase.networkDao().getAll_nonLiveData()); //grabs dataset
     }
@@ -29,11 +33,16 @@ public class ResultViewModel extends AndroidViewModel {
     public MutableLiveData<List<derpwork>> getOutput_list(){
         return output_list;
     }
+    public MutableLiveData<List<derpwork>> getWifi_list(){
+        return output_list;
+    }
 
+    /**
     //delete item from db
     public void deleteItem(derpwork network){
         new deleteAsyncTask(appDatabase).execute(network);
     }
+    **/
     private static class deleteAsyncTask extends AsyncTask<derpwork, Void, Void>{
         private AppDatabase db;
 

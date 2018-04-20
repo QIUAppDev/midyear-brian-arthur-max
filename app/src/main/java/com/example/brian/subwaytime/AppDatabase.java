@@ -14,6 +14,7 @@ import android.content.Context;
 @Database(entities = {derpwork.class},version=2)
 public abstract class AppDatabase extends RoomDatabase {
     private static AppDatabase INSTANCE;
+    private static AppDatabase WIFIINSTANCE;
 
     public static AppDatabase getDatabase(Context context){ /*implementation of "singleton" db*/
         if(INSTANCE==null){
@@ -28,6 +29,21 @@ public abstract class AppDatabase extends RoomDatabase {
 
         }
         return INSTANCE;
+    }
+
+    public static AppDatabase getLocalWifiDatabase(Context context){
+         if(WIFIINSTANCE==null){
+            final Migration MIGRATION_1_2 = new Migration(1,2){
+                @Override
+                public void migrate(SupportSQLiteDatabase database){
+                    database.execSQL("ALTER TABLE network RENAME TO wifidb");
+                }
+            };
+            WIFIINSTANCE = Room.databaseBuilder(context,
+                    AppDatabase.class, "wifi_db").addMigrations(MIGRATION_1_2).allowMainThreadQueries().build();
+
+        }
+        return WIFIINSTANCE;
     }
     public abstract NetworkDao networkDao();
 }

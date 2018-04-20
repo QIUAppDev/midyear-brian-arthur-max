@@ -1,29 +1,20 @@
 package com.example.brian.subwaytime.UnifiedSystem;
 
-import android.Manifest;
-import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.wifi.WifiManager;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -31,8 +22,6 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.example.brian.subwaytime.AppDatabase;
-import com.example.brian.subwaytime.MagneticData;
-import com.example.brian.subwaytime.MainActivity;
 import com.example.brian.subwaytime.PersistentID;
 import com.example.brian.subwaytime.PingActivity;
 import com.example.brian.subwaytime.R;
@@ -70,7 +59,7 @@ import static android.hardware.Sensor.TYPE_MAGNETIC_FIELD;
 * the prompt needs to formally request the station name for the networks
 * */
 
-public class UnifedMain extends AppCompatActivity implements SensorEventListener, StationFragment.StationFragmentListener, View.OnClickListener {
+public class UnifiedMain extends AppCompatActivity implements SensorEventListener, StationFragment.StationFragmentListener, View.OnClickListener {
 
     //for consistency, all declarations were made in the header
     //Exceptions: the Magnetism Sensors and the Wifi Sensors
@@ -149,7 +138,7 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
         viewModel = ViewModelProviders.of(this).get(ResultViewModel.class);
 
         //tells the app to observe changes made to the ui (i.e. the
-        viewModel.getOutput_list().observe(UnifedMain.this, new Observer<List<derpwork>>() {
+        viewModel.getOutput_list().observe(UnifiedMain.this, new Observer<List<derpwork>>() {
             @Override
             public void onChanged(@Nullable List<derpwork> itemAndPeople) {
                 recyclerViewAdapter.addItems(itemAndPeople);
@@ -158,7 +147,8 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
 
 
         //test stuff here
-            final WifiManager manager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+//            final WifiManager manager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
 
 
         usrQueryObj.addTextChangedListener(new TextWatcher() {
@@ -168,7 +158,7 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                //TODO function here to update the list
+                //TODO function here to update the list <- this should be already resolved
                 //this remains unchanged
                 String temp = "user changed text to:"+usrQueryObj.getText().toString();
                 Log.d("aaaagh",temp);
@@ -189,19 +179,7 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
 
 
     }
-/** OLD HERE
-    @Override
-    public void onClick(View v) {
-        derpwork borrowModel = (derpwork) v.getTag();
-        Intent intent = new Intent(getApplicationContext(),PingActivity.class);
-        intent.putExtra("davai hard", new String[]{borrowModel.getSsid(),borrowModel.getMac()});
-        startActivity(intent);
-        //viewModel.deleteItem(borrowModel);
-        //return true;
-    }
-**/
 
-    //NEW
     @Override
     public void onClick(View v) {
         derpwork borrowModel = (derpwork) v.getTag();
@@ -224,7 +202,7 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
     //1 ^ That would be because that'd be a null pointer, you can't init android stuff ddd
     private SensorManager mSensorManager;
     private Sensor mSensor;
-    private String TAG = "UnifedMain";
+    private String TAG = "UnifiedMain";
 
     //wifi sensors and data structures
     WifiManager mainwifi;
@@ -240,10 +218,11 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
     //DatabaseStuff
     DatabaseStuff control = new DatabaseStuff(this);
     AppDatabase appDatabase = control.appDatabase;
+    AppDatabase WifiDatabase = control.WifiDatabase;
 
     //set true if wifi networks have been pulled and are being labeled by the user
     //during this time, no pushes/wifi scans are performed while the user is making choices
-    private boolean menuOpen = false;
+    private boolean menuOpen = false; //TODO this shouldn't be necessary
 
 
 
@@ -292,7 +271,7 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
         // TODO: 4) pull up prompt and disable 10 second buffer so long as prompt is put up [DONE]
         // TODO: 5) display list of stations to select from/wifi networks?
         //TODO: 6) log new wifi networks (WITH STATION NAME) into Room [DONE]
-        //TODO: 7) pull and push to Firebase: a) to net wifi system and b) to user profile [DONE, WITH BUGS]
+        //TODO: 7) pull and push to Firebase: a) to net wifi system and b) to user profile [DONE, WITH BUGS] <- bug should be resolved
 
         //IMMEDIATE TODO: a) past added wifi networks still register, b) firebase
         if(timestamps.size()>1){
@@ -383,7 +362,7 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
 
 
     //this method is run when the user taps OK
-    //this method is also where UnifedMain pushes to the DBs
+    //this method is also where UnifiedMain pushes to the DBs
     public void onDialogPositiveClick(DialogFragment dialog){
         //temporary station name that will be replaced by user choice from promptStations()
         String station_name = "test_station_name";
