@@ -3,28 +3,41 @@ package com.example.brian.subwaytime.UnifiedSystem;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.DialogFragment;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.wifi.WifiManager;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 
 import com.example.brian.subwaytime.AppDatabase;
 import com.example.brian.subwaytime.MagneticData;
+import com.example.brian.subwaytime.MainActivity;
 import com.example.brian.subwaytime.PersistentID;
+import com.example.brian.subwaytime.PingActivity;
 import com.example.brian.subwaytime.R;
+import com.example.brian.subwaytime.RecyclerViewAdapter;
+import com.example.brian.subwaytime.ResultViewModel;
 import com.example.brian.subwaytime.derpwork;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -56,10 +69,149 @@ import static android.hardware.Sensor.TYPE_MAGNETIC_FIELD;
 * the app stops suddenly when step 9 concludes without any exceptions
 * the prompt needs to formally request the station name for the networks
 * */
-public class UnifedMain extends AppCompatActivity implements SensorEventListener, StationFragment.StationFragmentListener {
+
+public class UnifedMain extends AppCompatActivity implements SensorEventListener, StationFragment.StationFragmentListener, View.OnClickListener {
 
     //for consistency, all declarations were made in the header
     //Exceptions: the Magnetism Sensors and the Wifi Sensors
+
+
+
+    private ResultViewModel viewModel; //interacts with database (i.e. makes the necessary queries)
+    private RecyclerViewAdapter recyclerViewAdapter; //the middleman between the recyclerview front-end and the backend
+    private RecyclerView recyclerView;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+//SECTION 2 MAINACTIVITY CODE BELOW
+        Log.d(TAG, "onCreate: Began MainActivity code");
+
+
+        //initialize the Wifi Sensor
+        mainwifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+        //initialize the Magnetism Sensors
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
+        //check if the user is actually running magnetometer
+        String out = mSensorManager.getSensorList(TYPE_MAGNETIC_FIELD).toString();
+        Log.d(TAG, "onCreate: type of magnetometer if at all:"+out);
+        if(out != ""){
+            //user has no magnetometer. This is an issue. TODO
+        }
+
+        //inits activity layout
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        /*
+
+        old code for the bottom toolbar that was displaced for the new UI
+        TODOBRIANTHIS is kept so this code remains usable
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onClick: "+TODOBRIANFIXTHIS.get(0)[0]);
+                Log.d(TAG, "onClick: "+ Arrays.deepToString(TODOBRIANFIXTHIS.toArray()));
+
+                Log.d(TAG,"onClick timestampes: " + timestamps.get(0)); //timestamp stuff
+                Log.d(TAG,"onClick timestampes"+Arrays.deepToString(timestamps.toArray()));
+
+                Snackbar.make(view, "Started magnetic stuff", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+
+
+            }
+        });*/
+
+
+//SECTION 1 ORIGINAL UNIFIEDMAIN CODE BELOW
+        Log.d(TAG, "onCreate: Began UnifiedMain code");
+
+        //super.onCreate(savedInstanceState);
+        //setContentView(R.layout.activity_main);
+        final EditText usrQueryObj = findViewById(R.id.userQueryInput);
+
+        recyclerView = (RecyclerView) findViewById(R.id.listView);
+
+        //instantiates the adapter and links recyclerview with it
+        recyclerViewAdapter = new RecyclerViewAdapter(new ArrayList<derpwork>(), this);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(recyclerViewAdapter);
+
+        //instantiates the ResultViewModel
+        viewModel = ViewModelProviders.of(this).get(ResultViewModel.class);
+
+        //tells the app to observe changes made to the ui (i.e. the
+        viewModel.getOutput_list().observe(UnifedMain.this, new Observer<List<derpwork>>() {
+            @Override
+            public void onChanged(@Nullable List<derpwork> itemAndPeople) {
+                recyclerViewAdapter.addItems(itemAndPeople);
+            }
+        });
+
+
+        //test stuff here
+            final WifiManager manager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+
+        usrQueryObj.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                //TODO function here to update the list
+                //this remains unchanged
+                String temp = "user changed text to:"+usrQueryObj.getText().toString();
+                Log.d("aaaagh",temp);
+                //works^
+
+                //this is the part I added
+                String query = usrQueryObj.getText().toString();
+                viewModel.query_for_search_result(query);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+
+
+
+
+    }
+/** OLD HERE
+    @Override
+    public void onClick(View v) {
+        derpwork borrowModel = (derpwork) v.getTag();
+        Intent intent = new Intent(getApplicationContext(),PingActivity.class);
+        intent.putExtra("davai hard", new String[]{borrowModel.getSsid(),borrowModel.getMac()});
+        startActivity(intent);
+        //viewModel.deleteItem(borrowModel);
+        //return true;
+    }
+**/
+
+    //NEW
+    @Override
+    public void onClick(View v) {
+        derpwork borrowModel = (derpwork) v.getTag();
+        Intent intent = new Intent(getApplicationContext(),PingActivity.class);
+        intent.putExtra("davai hard", new String[]{borrowModel.getSsid(),borrowModel.getMac()});
+        startActivity(intent);
+        //viewModel.deleteItem(borrowModel);
+        //return true;
+    }
+
 
     //magnetism data structures
     public List<float[]> TODOBRIANFIXTHIS = new ArrayList(); //maintained for legacy support
@@ -97,55 +249,8 @@ public class UnifedMain extends AppCompatActivity implements SensorEventListener
 
     //    https://developer.android.com/guide/topics/sensors/sensors_motion.html#sensors-motion-accel
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
 
 
-
-        //initialize the Wifi Sensor
-        mainwifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-
-        //initialize the Magnetism Sensors
-        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-
-        //check if the user is actually running magnetometer
-        String out = mSensorManager.getSensorList(TYPE_MAGNETIC_FIELD).toString();
-        Log.d(TAG, "onCreate: type of magnetometer if at all:"+out);
-        if(out != ""){
-            //user has no magnetometer. This is an issue. TODO
-        }
-
-        //inits activity layout
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_unifed_main);
-
-        /*
-
-        old code for the bottom toolbar that was displaced for the new UI
-        TODOBRIANTHIS is kept so this code remains usable
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: "+TODOBRIANFIXTHIS.get(0)[0]);
-                Log.d(TAG, "onClick: "+ Arrays.deepToString(TODOBRIANFIXTHIS.toArray()));
-
-                Log.d(TAG,"onClick timestampes: " + timestamps.get(0)); //timestamp stuff
-                Log.d(TAG,"onClick timestampes"+Arrays.deepToString(timestamps.toArray()));
-
-                Snackbar.make(view, "Started magnetic stuff", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-
-
-            }
-        });*/
-
-
-    }
     protected void onResume(){
         super.onResume();
         mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
