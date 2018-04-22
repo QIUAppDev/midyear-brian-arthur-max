@@ -2,13 +2,15 @@ package com.example.brian.subwaytime;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 
 /**
  * Created by brian on 1/11/18.
+ * new entries are automatically checked if their mac address is already in the db
  */
 
-@Entity
+@Entity(indices={@Index(value={"mac_address"},unique=true)})
 public class derpwork {
 
     public derpwork(){

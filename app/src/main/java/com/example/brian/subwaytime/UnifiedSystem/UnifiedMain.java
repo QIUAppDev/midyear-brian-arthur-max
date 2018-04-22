@@ -59,9 +59,7 @@ import static android.hardware.Sensor.TYPE_MAGNETIC_FIELD;
 * the prompt needs to formally request the station name for the networks
 *
 * TODOS:
-* implement Uniqueness for MAC address on derpwork
-* eliminate unnecessary uniqueness parsing on DatabaseStuff (including the asynctask spagetti code)
-* update pullWifi() to account for uniqueness as a given
+* clean up front end to eliminate prompt in light of user indexing station names so DatabaseStuff can get cleeaned
 * */
 
 public class UnifiedMain extends AppCompatActivity implements SensorEventListener, StationFragment.StationFragmentListener, View.OnClickListener {
@@ -313,6 +311,7 @@ public class UnifiedMain extends AppCompatActivity implements SensorEventListene
 
     //runs a wifi scan and returns an array of local networks NOT indexed in database
     public ArrayList<derpwork> pullWifi(){
+        Log.d("test","pullWifi summoned");
         ArrayList<derpwork> fresh_wifi = new ArrayList<>();
 
         //this array list appends the new wifi networks staightaway
@@ -340,9 +339,9 @@ public class UnifiedMain extends AppCompatActivity implements SensorEventListene
                 testDerpwork.setDistanceSD(input[7]);
                 testDerpwork.setPasspoint(input[8]);
 
-                Log.d("mac address", testDerpwork.getMac());
+                Log.d("mac_address", testDerpwork.getMac());
 
-                //appends the new wifi network to the arraylist
+                //appends the new wifi network to an arraylist
                 fresh_wifi_no_parse.add(testDerpwork);
 
                 if(appDatabase.networkDao().station_query_mac_nonLiveData(testDerpwork.getMac()).size()==0){
@@ -354,9 +353,6 @@ public class UnifiedMain extends AppCompatActivity implements SensorEventListene
 
 
                 //appends fresh network to list if not in database
-                //TODO: this doesn't work
-                //it should now
-
                 if(control.search(testDerpwork).size()==0){
                     fresh_wifi.add(testDerpwork);
                 }
