@@ -2,6 +2,7 @@ package com.example.brian.subwaytime.UnifiedSystem;
 
 import android.app.Application;
 import android.content.Context;
+import android.net.wifi.ScanResult;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -64,6 +65,19 @@ public class DatabaseStuff implements OnTaskCompleted{
         Log.d("results_direct_size",Integer.toString(output.size()));
 
         return output;
+    }
+
+    //dumps wifi scans into the WiFi Room Persistence DB
+    public void addtoRoomWifiDB(final List<derpwork> results){
+        new AsyncTask<Void,Void,Void>(){
+            public Void doInBackground(Void...params){
+                for(derpwork network:results){
+                    WifiDatabase.networkDao().insertAll(network);
+                }
+                Log.d("size_of_wifi",Integer.toString(WifiDatabase.networkDao().getCount()));
+                return null;
+            }
+        }.execute();
     }
 
     //this method is invoked when the AsyncTask finishes

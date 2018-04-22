@@ -57,6 +57,11 @@ import static android.hardware.Sensor.TYPE_MAGNETIC_FIELD;
 * PROBLEM:
 * the app stops suddenly when step 9 concludes without any exceptions
 * the prompt needs to formally request the station name for the networks
+*
+* TODOS:
+* implement Uniqueness for MAC address on derpwork
+* eliminate unnecessary uniqueness parsing on DatabaseStuff (including the asynctask spagetti code)
+* update pullWifi() to account for uniqueness as a given
 * */
 
 public class UnifiedMain extends AppCompatActivity implements SensorEventListener, StationFragment.StationFragmentListener, View.OnClickListener {
@@ -284,6 +289,7 @@ public class UnifiedMain extends AppCompatActivity implements SensorEventListene
                 myRef.child("users").child(phone_id).child("all_data").setValue(data_meshed);
                 Log.d("push_to_firebase","10 seconds");
 
+
                 //gets fresh networks not in db, and pulls up the prompt
                 //TODO: uniqueness bug
                 fresh_wifi = pullWifi();
@@ -308,6 +314,11 @@ public class UnifiedMain extends AppCompatActivity implements SensorEventListene
     //runs a wifi scan and returns an array of local networks NOT indexed in database
     public ArrayList<derpwork> pullWifi(){
         ArrayList<derpwork> fresh_wifi = new ArrayList<>();
+
+        //this array list appends the new wifi networks staightaway
+        //once Room has uniqueness implemented, this arraylist will become the norm
+        ArrayList<derpwork> fresh_wifi_no_parse = new ArrayList<>();
+
         if(mainwifi.startScan()){
             for (android.net.wifi.ScanResult i : mainwifi.getScanResults()) {
                 String[] input = i.toString().split(",", -1);
@@ -331,6 +342,9 @@ public class UnifiedMain extends AppCompatActivity implements SensorEventListene
 
                 Log.d("mac address", testDerpwork.getMac());
 
+                //appends the new wifi network to the arraylist
+                fresh_wifi_no_parse.add(testDerpwork);
+
                 if(appDatabase.networkDao().station_query_mac_nonLiveData(testDerpwork.getMac()).size()==0){
                                 appDatabase.networkDao().insertAll(testDerpwork);
                 }
@@ -347,6 +361,9 @@ public class UnifiedMain extends AppCompatActivity implements SensorEventListene
                     fresh_wifi.add(testDerpwork);
                 }
             }
+
+            //adds fresh networks to wifi database
+            control.addtoRoomWifiDB(fresh_wifi_no_parse);
         }
 
         return fresh_wifi;
@@ -356,6 +373,7 @@ public class UnifiedMain extends AppCompatActivity implements SensorEventListene
     //When called, a prompt is summoned that requires the user to select a subway station
     //during this time, menuOpen is set as TRUE, ensuring no additional networks are requested while the user making up his mind
     public void promptStations(){
+        Log.d("prompt","loaded");
         DialogFragment dialog = new StationFragment();
         dialog.show(getFragmentManager(), "test");
     }
