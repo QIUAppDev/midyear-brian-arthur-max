@@ -192,14 +192,15 @@ public class UnifiedMain extends AppCompatActivity implements SensorEventListene
         derpwork borrowModel = (derpwork) v.getTag();
 
         //checks if the tapped network is part of WifiDatabase and runs PingActivity on it to wake up the user
-        if(WifiDatabase.networkDao().station_query_mac_nonLiveData(borrowModel.getMac()).size()!=0){
+        //case 1: wifi network is not part of WifiDatabase (i.e. offline) and sent to old activity
+        if(WifiDatabase.networkDao().station_query_mac_nonLiveData(borrowModel.getMac()).size()==0){
             Intent intent = new Intent(getApplicationContext(),PingActivity.class);
             intent.putExtra("davai hard", new String[]{borrowModel.getSsid(),borrowModel.getMac()});
             startActivity(intent);
             //viewModel.deleteItem(borrowModel);
             //return true;
         }
-        else{
+        else{ //case 2: wifi network IS part of WifiDatabase, and needs tagging
             //TODO: user tagging needs to go here
             //proposal: trigger prompt here?
         }
