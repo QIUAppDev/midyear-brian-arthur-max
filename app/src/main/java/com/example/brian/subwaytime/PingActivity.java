@@ -148,6 +148,7 @@ public class PingActivity extends AppCompatActivity {
                         if(network.getSsid().equals(ssidText) && network.getMac().equals(macText)){
 
                             //the ringer
+                            //TODO: fix bug
                             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
                             MediaPlayer mp = MediaPlayer.create(getApplicationContext(),notification);
                             mp.start();

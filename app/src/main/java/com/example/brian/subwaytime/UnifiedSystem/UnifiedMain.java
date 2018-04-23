@@ -183,14 +183,27 @@ public class UnifiedMain extends AppCompatActivity implements SensorEventListene
 
     }
 
+
+    //runs when a user taps on a network displayed on the RecyclerView
     @Override
     public void onClick(View v) {
+
+
         derpwork borrowModel = (derpwork) v.getTag();
-        Intent intent = new Intent(getApplicationContext(),PingActivity.class);
-        intent.putExtra("davai hard", new String[]{borrowModel.getSsid(),borrowModel.getMac()});
-        startActivity(intent);
-        //viewModel.deleteItem(borrowModel);
-        //return true;
+
+        //checks if the tapped network is part of WifiDatabase and runs PingActivity on it to wake up the user
+        if(WifiDatabase.networkDao().station_query_mac_nonLiveData(borrowModel.getMac()).size()!=0){
+            Intent intent = new Intent(getApplicationContext(),PingActivity.class);
+            intent.putExtra("davai hard", new String[]{borrowModel.getSsid(),borrowModel.getMac()});
+            startActivity(intent);
+            //viewModel.deleteItem(borrowModel);
+            //return true;
+        }
+        else{
+            //TODO: user tagging needs to go here
+            //proposal: trigger prompt here?
+        }
+
     }
 
 
