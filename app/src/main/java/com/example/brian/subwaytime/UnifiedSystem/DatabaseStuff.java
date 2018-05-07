@@ -67,6 +67,9 @@ public class DatabaseStuff implements OnTaskCompleted{
         return output;
     }
 
+
+    //this needs to be re-implemented
+
     //dumps wifi scans into the WiFi Room Persistence DB
     public void addtoRoomWifiDB(final List<derpwork> results){
         new AsyncTask<Void,Void,Void>(){
@@ -110,6 +113,13 @@ public class DatabaseStuff implements OnTaskCompleted{
             }
         }.execute();
     }
+
+
+
+    //firebase stuff is PORTABLE
+    //database stuff will have to change since its getting refactored
+
+
 
     //pulls latest wifi networks from Firebase, appends it to local DB, and pushes entire thing back to Firebase
     //also pushes local DB to user profile on Firebase
