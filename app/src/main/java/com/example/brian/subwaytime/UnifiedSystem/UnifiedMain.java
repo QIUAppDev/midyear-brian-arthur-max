@@ -154,6 +154,8 @@ public class UnifiedMain extends AppCompatActivity implements SensorEventListene
 
 
 
+
+        //most of this code works
         usrQueryObj.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -167,7 +169,7 @@ public class UnifiedMain extends AppCompatActivity implements SensorEventListene
                 Log.d("aaaagh",temp);
                 //works^
 
-                //this is the part I added
+                //this part will change with the recyclerview
                 String query = usrQueryObj.getText().toString();
                 viewModel.query_for_search_result(query);
             }
@@ -333,6 +335,10 @@ public class UnifiedMain extends AppCompatActivity implements SensorEventListene
         //once Room has uniqueness implemented, this arraylist will become the norm
         ArrayList<derpwork> fresh_wifi_no_parse = new ArrayList<>();
 
+
+        //most of this wifi scan code works
+        //database stuff needs changign
+        //ActivityScan has original version of this code
         if(mainwifi.startScan()){
             for (android.net.wifi.ScanResult i : mainwifi.getScanResults()) {
                 String[] input = i.toString().split(",", -1);
