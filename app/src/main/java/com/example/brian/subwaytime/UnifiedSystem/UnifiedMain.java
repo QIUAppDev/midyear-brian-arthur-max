@@ -201,6 +201,7 @@ public class UnifiedMain extends AppCompatActivity implements SensorEventListene
             //return true;
         }
         else{ //case 2: wifi network IS part of WifiDatabase, and needs tagging
+            promptStations(borrowModel);
             //TODO: user tagging needs to go here
             //proposal: trigger prompt here?
         }
@@ -307,7 +308,7 @@ public class UnifiedMain extends AppCompatActivity implements SensorEventListene
                 fresh_wifi = pullWifi();
                 if(fresh_wifi.size()!=0){
                     Log.d("update","new networks!");
-                    promptStations();
+//                    promptStations(); this is not needed
                 }
                 menuOpen=false;
 
@@ -382,8 +383,9 @@ public class UnifiedMain extends AppCompatActivity implements SensorEventListene
 
     //When called, a prompt is summoned that requires the user to select a subway station
     //during this time, menuOpen is set as TRUE, ensuring no additional networks are requested while the user making up his mind
-    public void promptStations(){
-        Log.d("prompt","loaded");
+    public void promptStations(derpwork networkTapped){
+
+        Log.d("prompt","network is "+networkTapped.getName());
         DialogFragment dialog = new StationFragment();
         dialog.show(getFragmentManager(), "test");
     }

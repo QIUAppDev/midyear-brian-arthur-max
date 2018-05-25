@@ -42,6 +42,7 @@ public class StationFragment extends DialogFragment {
     //the listener is called such that UnifedMain is notified that the user has tapped
     public Dialog onCreateDialog(Bundle savedInstanceState){
         AlertDialog.Builder sample_builder = new AlertDialog.Builder(getActivity());
+        sample_builder.setView("activity_main");
         sample_builder.setMessage("This is a sample prompt. No new networks should be scanned while this prompt is up");
         sample_builder.setCancelable(true);
         sample_builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {

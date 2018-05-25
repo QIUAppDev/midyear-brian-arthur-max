@@ -1,0 +1,1302 @@
+/*
+* possible implementations:
+* -collapse Network item generation into a single method
+* */
+
+package com.example.brian.subwaytime;
+
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+
+import java.util.List;
+
+public class ActivityScan extends AppCompatActivity {
+    boolean hasStarted = false;
+    Button button;
+    TextView text;
+    final int REQUEST_CODE=1;
+
+    final AppDatabase appDatabase = AppDatabase.getDatabase(this);
+
+    WifiManager mainwifi;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        Log.d("onCreate", "onCreate: App started.");
+        if(!(ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED)){
+            //if perms aren't granted, we ask
+            ActivityCompat.requestPermissions(ActivityScan.this,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},REQUEST_CODE); //TODO whats a request code?
+
+        }
+        if(ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED){
+            Log.d("permissions","permissions granted!");
+        }
+        else{
+            Log.d("permissions","denied, something sent wrong");
+        }
+        mainwifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_scan);
+        button= findViewById(R.id.button);
+        text = findViewById(R.id.textView2);
+        /*
+        start.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(!hasStarted){
+                    start.setText("true");
+                }
+            }
+        });
+        */
+    }
+
+    public void buttonClick(View v){
+        if(!hasStarted){ //start app here
+            button.setText("Stop");
+            text.setText("Running");
+            
+            if (mainwifi.startScan()){
+                Log.d("wifistuff", "wifi successfuly started");
+                hasStarted = true;
+                for (android.net.wifi.ScanResult i : mainwifi.getScanResults() //messy but it should work
+                     ) {
+                    String[] input = i.toString().split(",", -1);
+                    /* you know it's great when you need a multiline comment to explain what you just did
+                    input is an array of all the vars that you're gonna need. It will look something like the following array
+                    {SSID: ssidNameHere,
+                    BSSID: so:me:th:in:g_:in,
+                    capabilities: [WPA2-PSK-CCMP][ESS],
+                    level: -(this is signal strength, more negative, lower numbers mean stronger signal),
+                    frequency: (honestly irrelevant),
+                    timestamp: (presumably miliseconds since the code started),
+                    distance: (very inconsistent, might be a bad idea to use),
+                    distanceSD: (I have no idea),
+                    passpoint: (is personal hotspot),
+                    etc. you get the point. These will always be in the same order, so just query the int location of data you need. Stuff like at 0, you have SSID, and BSSID is it's mac address
+
+                    oh and also this is a foreach loop, so just use the SSID to order the DB or the time added. Idc, just know there's no int i.
+
+                    */
+                    Log.d("shitfuck",i.toString());
+                    testAdd(input[0],input[0],input[1],input[2],input[3],input[4],input[5],input[6],input[7],input[8]);
+                    //this passes the output to the database
+                    //input[0] will be replaced with the station names eventually
+
+
+                }
+            } else {
+                Log.d("wifistuff", "serious err, couldn't start wifi");//TODO PERMISSIONS potentially done rn
+                hasStarted = false;
+            }
+            
+            testAdd("network_c","ss_c","mac_c", "cap_a","level_a","freq_a","tstamp_a","dista","distsd_a","pspnt_a");
+
+        }
+        else if(hasStarted){ //stop app here
+            button.setText("Start");
+            text.setText("Finish");
+            hasStarted=false;
+            queryDB("network_a"); //searches the database
+            //testAdd("network_b","ss_b","mac_b");
+        }
+        //test code here
+        //Log.d("wifistuff", wifiOut());
+
+
+    }
+
+    /*private String wifiOut(){
+        return mainwifi.getScanResults().toString();
+    }*/
+
+    public void queryDB(String name){ //does the search query
+        final String nameF = name;
+        new AsyncTask<Void,Void,Void>(){
+            protected Void doInBackground(Void...params){
+                List<derpwork> results = appDatabase.networkDao().station_query_nonLiveData(nameF);
+
+
+                if(results.size()==0){Log.e("search results for " + nameF, "no search results were found,");}
+                else{
+                    Log.d("search results for " + nameF, "found!");
+                    for(derpwork network : results){
+                        Log.d(nameF + " search result", " station name: " + network.getName() + " network name: "
+                                + network.getSsid() + " station MAC address: " + network.getMac());
+                        //outputs any results
+
+                    }
+                }
+                return null;
+            }
+        }.execute();
+    }
+
+    public void testAdd(String name, String ss, String mac, String cap, String level, String freq,String tstamp,String dist,String distsd,String pspnt ){
+        final derpwork testDerpwork = new derpwork();
+        testDerpwork.setName(name); //again, name refers to the STATION NAME, not the NETWORK NAME
+        testDerpwork.setSsid(ss); //this refers to the NETWORK NOISE
+        testDerpwork.setMac(mac);
+        //sub-details
+        testDerpwork.setCapabilities(cap);
+        testDerpwork.setLevel(level);
+        testDerpwork.setFrequency(freq);
+        testDerpwork.setTimestamp(tstamp);
+        testDerpwork.setDistance(dist);
+        testDerpwork.setDistanceSD(distsd);
+        testDerpwork.setPasspoint(pspnt);
+
+        new AsyncTask<Void,Void,Void>(){
+            protected Void doInBackground(Void...params){
+                //checks if network doesn't exist, and adds it if it does
+                //this was the first problematic section
+                if(appDatabase.networkDao().station_query_mac_nonLiveData(testDerpwork.getMac()).size()==0){
+                    appDatabase.networkDao().insertAll(testDerpwork);
+                }
+                else{
+                    Log.d("Update","The derpwork " + testDerpwork.getName() + " already exists, so it was not added");
+                }
+
+                //Some extra uesful diagnostic info
+                Log.d("number of networks",Integer.toString(appDatabase.networkDao().getCount()));
+                List<derpwork> derpwork_list = appDatabase.networkDao().getAll_nonLiveData();
+
+                for(derpwork a : derpwork_list){
+                    Log.d("derpwork " + a.getName(),"SSID: " + a.getSsid() + ", MAC: " + a.getMac() + ", levels: " + a.getLevel());
+                }
+
+                //keep this around
+                return null;
+            }
+        }.execute();
+    }
+
+    public void resetDB(){
+        new AsyncTask<Void,Void,Void>(){ //deletes all rows as expected. don't run if there are no rows. idk what'll happen
+            protected Void doInBackground(Void...params){
+                appDatabase.networkDao().deleteAll();
+                Log.d("update","all previous networks have been deleted");
+                return null;
+            }
+        }.execute();
+    }
+}
+package com.example.brian.subwaytime;
+
+import android.arch.persistence.db.SupportSQLiteDatabase;
+import android.arch.persistence.room.Database;
+import android.arch.persistence.room.Room;
+import android.arch.persistence.room.RoomDatabase;
+import android.arch.persistence.room.migration.Migration;
+import android.content.Context;
+
+/**
+ * Created by brian on 1/11/18.
+ */
+
+@Database(entities = {derpwork.class},version=2)
+public abstract class AppDatabase extends RoomDatabase {
+    private static AppDatabase INSTANCE;
+    private static AppDatabase WIFIINSTANCE;
+
+    public static AppDatabase getDatabase(Context context){ /*implementation of "singleton" db*/
+        if(INSTANCE==null){
+            final Migration MIGRATION_1_2 = new Migration(1,2){
+                @Override
+                public void migrate(SupportSQLiteDatabase database){
+                    database.execSQL("ALTER TABLE network RENAME TO derpwork");
+                }
+            };
+            INSTANCE= Room.databaseBuilder(context,
+                    AppDatabase.class, "network_db").addMigrations(MIGRATION_1_2).allowMainThreadQueries().build();
+
+        }
+        return INSTANCE;
+    }
+
+    public static AppDatabase getLocalWifiDatabase(Context context){
+         if(WIFIINSTANCE==null){
+            final Migration MIGRATION_1_2 = new Migration(1,2){
+                @Override
+                public void migrate(SupportSQLiteDatabase database){
+                    database.execSQL("ALTER TABLE network RENAME TO wifidb");
+                }
+            };
+            WIFIINSTANCE = Room.databaseBuilder(context,
+                    AppDatabase.class, "wifi_db").addMigrations(MIGRATION_1_2).allowMainThreadQueries().build();
+
+        }
+        return WIFIINSTANCE;
+    }
+    public abstract NetworkDao networkDao();
+}
+package com.example.brian.subwaytime;
+
+import android.content.Intent;
+import android.os.AsyncTask;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Logger;
+import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import java.util.HashMap;
+import java.util.List;
+
+public class FirebaseTest extends AppCompatActivity {
+
+    //FIREBASE stuff
+    private FirebaseDatabase database;
+    private DatabaseReference myRef;
+
+    //Room Persistence DB
+    final AppDatabase appDatabase = AppDatabase.getDatabase(this);
+
+    private Button push_to_firebase;
+    private Button pull_from_firebase;
+    private Button back_to_menu;
+
+    private static final String TAG = "aaaaaaaaaa";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_firebase_test);
+
+        //init the database
+        database = FirebaseDatabase.getInstance();
+        myRef = database.getReference("message");
+
+        //init the buttons and the UI
+        push_to_firebase = findViewById(R.id.button4);
+        pull_from_firebase = findViewById(R.id.button5);
+        back_to_menu = findViewById(R.id.button6);
+
+        push_to_firebase.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                pushFirebase();
+            }
+        });
+
+        pull_from_firebase.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                pullFirebase();
+            }
+        });
+
+        back_to_menu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(view.getContext(), StartActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+
+    }
+
+    public void pullFirebase(){
+        // Read from the database
+        myRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // This method is called once with the initial value and again
+                // whenever data at this location is updated.
+
+                //pulls and directly de-serializes fresh network objects
+                for(DataSnapshot network : dataSnapshot.getChildren()){
+
+                    //de-serializes object and reconstructs it to strip the autogenerated id
+                    derpwork input_network = network.getValue(derpwork.class);
+                    final derpwork testwork = new derpwork();
+                    testwork.setTimestamp(input_network.getTimestamp());
+                    testwork.setPasspoint(input_network.getPasspoint());
+                    testwork.setMac(input_network.getMac());
+                    testwork.setLevel(input_network.getLevel());
+                    testwork.setDistanceSD(input_network.getDistanceSD());
+                    testwork.setCapabilities(input_network.getCapabilities());
+                    testwork.setSsid(input_network.getSsid());
+                    testwork.setName(input_network.getName());
+                    testwork.setDistance(input_network.getDistance());
+                    testwork.setFrequency(input_network.getFrequency());
+
+                    //if the network isn't already added, it is added to the local database
+                    new AsyncTask<Void,Void,Void>(){
+                        public Void doInBackground(Void... params){
+                            Log.d("testwork name", testwork.getName());
+                            if(appDatabase.networkDao().station_query_mac_nonLiveData(testwork.getMac()).size()==0){
+                                appDatabase.networkDao().insertAll(testwork);
+                            }
+                            else{
+                                Log.e("network already here","The network called " + testwork.getSsid() + "is already in the db, so it wasn't added");
+                            }
+
+                            return null;
+                        }
+                    }.execute();
+
+                }
+
+                //TODO: write code that adds new objects to local db
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+                Log.w(TAG, "Failed to read value.", error.toException());
+            }
+        });
+    }
+
+    public void pushFirebase(){ //uses the derpwork class STRUCTURE to add to firebase
+        //proposed feature: since our DB is literally just one table, a simple method can read off incoming JSON files and write into db
+        //advantages: boilerplate recyclerview code remains untouched
+
+        //generates a test object and appends to the wifi network
+        //ideally, on the subway run, Room persistence captures the wifi networks, and Firebase bundles them up and pushes them
+
+        Log.d("testData","progress got here");
+
+
+
+        //pulls the networks accumulated in the local Room database, and pushes it onto Firebase
+        new AsyncTask<Void,Void,Void>(){
+            protected Void doInBackground(Void... params){
+
+                //gets locally accumulated data
+                List<derpwork> all_networks = appDatabase.networkDao().getAll_nonLiveData();
+                final HashMap<String, derpwork> wifi_push = new HashMap<>();
+                for(derpwork network : all_networks){
+                    wifi_push.put(network.getMac(), network);
+                }
+
+                //downloads existing data, appends, and pushes
+                myRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Log.d("debugstep","stepping here");
+                        for(DataSnapshot network : dataSnapshot.getChildren()){
+                            derpwork input_network = network.getValue(derpwork.class);
+                            wifi_push.put(input_network.getMac(),input_network);
+                        }
+                        myRef.setValue(wifi_push);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.w(TAG, "Failed to read value.", databaseError.toException());
+                    }
+                });
+
+
+                return null;
+            }
+        }.execute();
+
+
+        //wifi_push.put("station_1",test_network);
+
+        //myRef.child("station_1").setValue(test_network);
+
+
+
+
+
+    }
+
+
+}
+/*
+* A test class for implementing the Graph package
+* comes with an Activity that displays a graph
+* */
+
+package com.example.brian.subwaytime;
+
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+
+import com.github.mikephil.charting.charts.LineChart;
+
+public class GraphTest extends AppCompatActivity {
+
+    LineChart chart; //corresponds with XML entry
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_graph_test);
+
+        chart = (LineChart) findViewById(R.id.chart);
+
+        //TODO: implement adding data
+    }
+}
+package com.example.brian.subwaytime;
+
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.View;
+
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+
+import static android.hardware.Sensor.TYPE_MAGNETIC_FIELD;
+
+public class MagneticData extends AppCompatActivity implements SensorEventListener {
+
+    //magnetic data (and corresponding) timestamps that get posted by user ID to firebase
+    //pushes to firebase every 10 seconds (i.e. when the unix timestamp is divisible by 10)
+    public List<float[]> TODOBRIANFIXTHIS = new ArrayList(); //legacy holder
+    public List<Long> timestamps = new ArrayList();
+    public HashMap<String,List<Float>> data_meshed = new HashMap<>(); //format that is pushed to Firebase
+
+    //magnetic stuff
+    private SensorManager mSensorManager;
+    private Sensor mSensor;
+    private String TAG = "MagneticData";
+
+    //FIREBASE stuff
+    //a different point of reference will be accessed than FirebaseTest to post users
+    private FirebaseDatabase database;
+    private DatabaseReference myRef;
+
+
+//    https://developer.android.com/guide/topics/sensors/sensors_motion.html#sensors-motion-accel
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        //just a little something spliced into it for testing. Probably can stay
+        int REQUEST_CODE = 1;
+        if(!(ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED)){
+            //if perms aren't granted, we ask
+            ActivityCompat.requestPermissions(MagneticData.this,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},REQUEST_CODE); //TODO whats a request code?
+
+        }
+        if(ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED){
+            Log.d("permissions","permissions granted!");
+        }
+        else{
+            Log.d("permissions","denied, something sent wrong");
+        }
+
+        //initialize the references
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
+
+
+        //check if the user is actually running magnetometer
+        String out = mSensorManager.getSensorList(TYPE_MAGNETIC_FIELD).toString();
+        Log.d(TAG, "onCreate: type of magnetometer if at all:"+out);
+        if(out != ""){
+            //user has no magnetometer. This is an issue. TODO
+        }
+
+
+
+
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_data_get);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onClick: "+TODOBRIANFIXTHIS.get(0)[0]);
+                Log.d(TAG, "onClick: "+ Arrays.deepToString(TODOBRIANFIXTHIS.toArray()));
+
+                Log.d(TAG,"onClick timestampes: " + timestamps.get(0)); //timestamp stuff
+                Log.d(TAG,"onClick timestampes"+Arrays.deepToString(timestamps.toArray()));
+
+                Snackbar.make(view, "Started magnetic stuff", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+
+
+            }
+        });
+
+        //init the firebase
+        //getReference changes the "database mode" such that the "users" tree is edited, not the wifi networks
+        database = FirebaseDatabase.getInstance();
+        myRef = database.getReference("users");
+    }
+    protected void onResume(){
+        super.onResume();
+        mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    public void onSensorChanged(SensorEvent event){
+
+        //Log.d(TAG, "onSensorChanged: 0="+event.values[0]+" 1="+event.values[1]+" 2="+event.values[2]);
+        //OLD SYSTEM
+        float[] temp = {event.values[0],event.values[1],event.values[2]}; //kept to keep button working, will be removed later
+        TODOBRIANFIXTHIS.add(temp);// lord knows why I can't do this inline
+        timestamps.add(System.currentTimeMillis()/1000); //kept to ensure 10 second buffer works
+
+
+        //NEW SYSTEM: assemble raw magnetic values into List, then append List into HashMap (paired with corresponding timestamp) for pushing to Firebase
+        List<Float> temp_list = new ArrayList(); //temp except as a List (for pushing to firebase)
+        temp_list.add(event.values[0]);
+        temp_list.add(event.values[1]);
+        temp_list.add(event.values[2]);
+
+        data_meshed.put(timestamps.get(timestamps.size()-1).toString(),temp_list); //note: timestamp is converted to string to comply with firebase standards
+
+
+
+        //checks if a) timestamps size is at least 2, b)if an actual change of timestamp has occured, c) if it's 10 seconds
+        //TODO: integrate wifi and magnetism, such that 10 second buffer itself triggers wifi scan, and prompts users to select station
+        //TODO: 1) move old activites to separate folder and ensure functinoality works. 2) create new activity and ensure magnetism buffer works/magnetism db works. 3) integrate wifi and ensure wifi
+        //todo: networks detected. 4) pull up prompt and disable 10 second buffer so long as prompt is put up 5) handle database pushes
+        if(timestamps.size()>1){
+            if(!timestamps.get(timestamps.size()-1).equals(timestamps.get(timestamps.size()-2)) && timestamps.get(timestamps.size()-1)%10==0){
+                String phone_id = PersistentID.get_id();
+                myRef.child(phone_id).child("phone_id").setValue(phone_id);
+                myRef.child(phone_id).child("all_data").setValue(data_meshed);
+                Log.d("push_to_firebase","10 seconds");
+            }
+        }
+
+        //Log.d("changed sensor","yes");
+    }
+    public void onAccuracyChanged(Sensor event, int accuracy){
+        Log.d(TAG, "onAccuracyChanged: "+accuracy);
+
+    }
+
+
+}package com.example.brian.subwaytime;
+
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
+import android.content.Intent;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class MainActivity extends AppCompatActivity implements View.OnClickListener{
+
+    private ResultViewModel viewModel; //interacts with database (i.e. makes the necessary queries)
+    private RecyclerViewAdapter recyclerViewAdapter; //the middleman between the recyclerview front-end and the backend
+    private RecyclerView recyclerView;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        final EditText usrQueryObj = findViewById(R.id.userQueryInput);
+
+        recyclerView = (RecyclerView) findViewById(R.id.listView);
+
+        //instantiates the adapter and links recyclerview with it
+        recyclerViewAdapter = new RecyclerViewAdapter(new ArrayList<derpwork>(), this);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(recyclerViewAdapter);
+
+        //instantiates the ResultViewModel
+        viewModel = ViewModelProviders.of(this).get(ResultViewModel.class);
+
+        //tells the app to observe changes made to the ui (i.e. the
+        viewModel.getOutput_list().observe(MainActivity.this, new Observer<List<derpwork>>() {
+            @Override
+            public void onChanged(@Nullable List<derpwork> itemAndPeople) {
+                recyclerViewAdapter.addItems(itemAndPeople);
+            }
+        });
+
+
+        //test stuff here
+            final WifiManager manager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+
+        usrQueryObj.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                //TODO function here to update the list
+                //this remains unchanged
+                String temp = "user changed text to:"+usrQueryObj.getText().toString();
+                Log.d("aaaagh",temp);
+                //works^
+
+                //this is the part I added
+                String query = usrQueryObj.getText().toString();
+                viewModel.query_for_search_result(query);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+
+
+
+
+    }
+
+    @Override
+    public void onClick(View v) {
+        derpwork borrowModel = (derpwork) v.getTag();
+        Intent intent = new Intent(getApplicationContext(),PingActivity.class);
+        intent.putExtra("davai hard", new String[]{borrowModel.getSsid(),borrowModel.getMac()});
+        startActivity(intent);
+        //viewModel.deleteItem(borrowModel);
+        //return true;
+    }
+
+}
+package com.example.brian.subwaytime;
+
+import android.arch.lifecycle.LiveData;
+import android.arch.persistence.room.Dao;
+import android.arch.persistence.room.Delete;
+import android.arch.persistence.room.Insert;
+import android.arch.persistence.room.OnConflictStrategy;
+import android.arch.persistence.room.Query;
+
+import java.util.List;
+
+/**
+ * Created by brian on 1/11/18.
+ */
+
+@Dao
+public interface NetworkDao {
+
+    @Query("SELECT * FROM derpwork")
+    LiveData<List<derpwork>> getAll(); //List<derpwork> was the original. LiveData ensured the front end works with backend.
+    //changes were accordingly made on the ActivityScan side, so things should still work
+
+    /*check if the network's already there*/
+    @Query("SELECT * FROM derpwork WHERE network_name LIKE :name OR ssid LIKE :ssid OR mac_address LIKE :mac")
+    List<derpwork> isAdded(String name, String ssid, String mac);
+
+    @Query("SELECT * FROM derpwork WHERE network_name LIKE :name")
+    LiveData<List<derpwork>> station_query(String name);
+
+    @Query("SELECT * FROM derpwork WHERE :mac_address LIKE mac_address")
+    List<derpwork> station_query_mac_nonLiveData(String mac_address);
+
+
+
+
+    //queries that use List<> to ensure that the ScanActivity methods work
+
+    @Query("SELECT * FROM derpwork")
+    List<derpwork> getAll_nonLiveData(); //List<derpwork> was the original. LiveData ensured the front end works iwth backend.
+    //changes were accordingly made on the ActivityScan side, so things should still work
+
+    /*check if the network's already there*/
+    @Query("SELECT * FROM derpwork WHERE network_name LIKE :name OR ssid LIKE :ssid OR mac_address LIKE :mac")
+    List<derpwork> isAdded_nonLiveData(String name, String ssid, String mac);
+
+    @Query("SELECT * FROM derpwork WHERE INSTR(network_name,:name)")
+    List<derpwork> station_query_nonLiveData(String name);
+
+
+
+    @Query("SELECT COUNT(*) FROM derpwork")
+    int getCount();
+
+    @Query("DELETE FROM derpwork")
+    void deleteAll();
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    void insertAll(derpwork... derpworks);
+
+    @Delete
+    void delete(derpwork derpwork);
+
+}
+package com.example.brian.subwaytime;
+
+import android.content.Context;
+
+import com.google.firebase.iid.FirebaseInstanceId;
+
+/*
+* generates a persistent ID using Firebase's FirebasePersistentID
+* as it turns out, Google Play API's InstanceID is depreciated, hence this
+* this apparently survives app restarts, so i guess this works
+*
+* note: class structure follows AppDatabase
+* */
+public abstract class PersistentID {
+    private static String PERSISTENT_ID;
+
+    public static String get_id(){
+        if(PERSISTENT_ID==null){
+            PERSISTENT_ID = FirebaseInstanceId.getInstance().getId();
+        }
+        return PERSISTENT_ID;
+    }
+}
+/*
+* insert this code
+* private SensorManager mSensorManager;
+private Sensor mSensor;
+private TriggerEventListener mTriggerEventListener;
+...
+mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION);
+
+mTriggerEventListener = new TriggerEventListener() {
+    @Override
+    public void onTrigger(TriggerEvent event) {
+        // Do work
+    }
+};
+
+mSensorManager.requestTriggerSensor(mTriggerEventListener, mSensor);
+
+
+//proposal: add button?
+* */
+
+
+package com.example.brian.subwaytime;
+
+import android.content.Context;
+import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
+import android.hardware.TriggerEventListener;
+import android.media.MediaPlayer;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.net.wifi.WifiManager;
+import android.os.Bundle;
+import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class PingActivity extends AppCompatActivity {
+
+    //insert hotspot stuff here;
+    private String ssid_temp = "G6"; //left these two just in case shit breaks
+    private String mac_temp = "de:0b:34:c4:ac:e7";
+    private TextView ssid;
+    private TextView mac;
+    private TextView output;
+    private WifiManager mainwifi;
+    private List<derpwork> networks;
+
+    private SensorManager mSensorManager;
+    private Sensor mSensor;
+    private TriggerEventListener mTriggerEventListener;
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_ping);
+
+        //dada dum du dum! (sakurasou was a really good anime)
+        String[] ins = getIntent().getStringArrayExtra("davai hard");
+        final String ssidText = ins[0];
+        final String macText = ins[1];
+
+        //instantiates and sends ssid to ui
+        ssid = findViewById(R.id.textView5);
+        ssid.setText("SSID: " + ssidText);
+
+        //instantiates and sends mac address to ui
+        mac = findViewById(R.id.textView6);
+        mac.setText("MAC: " + macText);
+
+        //instanties and sends msg to user about wifi status
+        //this is the initial condition, which will change if a wifi match is detected
+        output = findViewById(R.id.textView7);
+        output.setText("Out of Range");
+        output.setTextColor(Color.RED);
+
+
+        mainwifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+        //the wifi networks pinged are collected into a a list of derpwork objects, which we compare with the given ssid + mac
+        networks = new ArrayList<derpwork>();
+
+
+        //the timer
+        final Handler handler = new Handler();
+        final int delay = 5000; //milliseconds
+
+        handler.postDelayed(new Runnable(){
+            public void run(){
+                //do something
+                if (mainwifi.startScan()){
+                    Log.d("wifistuff", "wifi successfuly started");
+                    for (android.net.wifi.ScanResult i : mainwifi.getScanResults()) {
+                        //messy but it should work
+                        String[] input = i.toString().split(",", -1);
+                    /* you know it's great when you need a multiline comment to explain what you just did
+                    input is an array of all the vars that you're gonna need. It will look something like the following array
+                    {SSID: ssidNameHere,
+                    BSSID: so:me:th:in:g_:in,
+                    capabilities: [WPA2-PSK-CCMP][ESS],
+                    level: -(this is signal strength, more negative, lower numbers mean stronger signal),
+                    frequency: (honestly irrelevant),
+                    timestamp: (presumably miliseconds since the code started),
+                    distance: (very inconsistent, might be a bad idea to use),
+                    distanceSD: (I have no idea),
+                    passpoint: (is personal hotspot),
+                    etc. you get the point. These will always be in the same order, so just query the int location of data you need. Stuff like at 0, you have SSID, and BSSID is it's mac address
+
+                    oh and also this is a foreach loop, so just use the SSID to order the DB or the time added. Idc, just know there's no int i.
+
+                    */
+                        Log.d("shitfuck",i.toString());
+
+                        //instnatiates temporary derpwrok object and adds values to it
+                        derpwork testDerpwork = new derpwork();
+                        testDerpwork.setName(input[0]); //again, name refers to the STATION NAME, not the NETWORK NAME
+                        testDerpwork.setSsid(input[0]); //this refers to the NETWORK NOISE
+                        testDerpwork.setMac(input[1]);
+                        //sub-details
+                        testDerpwork.setCapabilities(input[2]);
+                        testDerpwork.setLevel(input[3]);
+                        testDerpwork.setFrequency(input[4]);
+                        testDerpwork.setTimestamp(input[5]);
+                        testDerpwork.setDistance(input[6]);
+                        testDerpwork.setDistanceSD(input[7]);
+                        testDerpwork.setPasspoint(input[8]);
+
+                        //adds value to list
+                        networks.add(testDerpwork);
+
+
+
+                    }
+                } else {
+                    Log.d("wifistuff", "serious err, couldn't start wifi");//TODO PERMISSIONS potentially done rn
+                }
+
+                //runs through our list and checks for a match
+                if(networks.size()>0){
+                    for(derpwork network : networks){
+                        if(network.getSsid().equals(ssidText) && network.getMac().equals(macText)){
+
+                            //the ringer
+                            //TODO: fix bug
+                            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+                            MediaPlayer mp = MediaPlayer.create(getApplicationContext(),notification);
+                            mp.start();
+
+                            //changes condition to valid
+                            output.setText("In Range!");
+                            output.setTextColor(Color.GREEN);
+                        }
+                    }
+                }
+                handler.postDelayed(this, delay);
+            }
+        }, delay);
+
+
+        /*
+        //starts the sensor manager
+        //basically the code reference from android
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION);
+
+        mTriggerEventListener = new TriggerEventListener() {
+            @Override
+            public void onTrigger(TriggerEvent event) {
+
+
+                //when android detects the shaking, it triggers the scan
+
+                //essentially activityscan's code
+
+
+                //end of onTrigger method
+            }
+        };
+
+        //starts the process, I think?
+        mSensorManager.requestTriggerSensor(mTriggerEventListener, mSensor);
+        */
+
+    }
+}
+package com.example.brian.subwaytime;
+
+import android.support.v7.widget.CardView;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import java.util.List;
+
+/**
+ * Created by brian on 1/15/18.
+ */
+
+public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.RecyclerViewHolder> {
+    private List<derpwork> network_list; //dataset
+    private View.OnClickListener onClickListener;
+
+    public RecyclerViewAdapter(List<derpwork> derp_list, View.OnClickListener listener){
+        network_list=derp_list;
+        onClickListener = listener;
+    }
+
+    @Override
+    public RecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
+        return new RecyclerViewHolder(LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.recyclerview_item, parent, false));
+        //sets up details for individual items via recyclerview_item xml file
+        //recyclerviewholder is a static class embedded here
+    }
+
+    //set up details of each individual item
+    @Override
+    public void onBindViewHolder(final RecyclerViewHolder holder, int position) {
+        derpwork network= network_list.get(position);
+        holder.itemTextView.setText(network.getName());
+        holder.nameTextView.setText(network.getSsid());
+        holder.dateTextView.setText(network.getMac());
+        holder.itemView.setTag(network);
+        holder.itemView.setOnClickListener(onClickListener); //links a listener to the object
+    }
+
+    //getter setter method
+    @Override
+    public int getItemCount() {
+        return network_list.size();
+    }
+
+
+    //changes network list and tells app the dataset changed
+    public void addItems(List<derpwork> new_list) {
+        network_list = new_list;
+        notifyDataSetChanged();
+    }
+
+
+    static class RecyclerViewHolder extends RecyclerView.ViewHolder {
+        private TextView itemTextView;
+        private TextView nameTextView;
+        private TextView dateTextView;
+        private CardView card_view;
+
+        RecyclerViewHolder(View view) {
+            super(view);
+            card_view = (CardView) view.findViewById(R.id.cv);
+            itemTextView = (TextView) view.findViewById(R.id.itemTextView);
+            nameTextView = (TextView) view.findViewById(R.id.nameTextView);
+            dateTextView = (TextView) view.findViewById(R.id.dateTextView);
+        }
+    }
+}
+package com.example.brian.subwaytime;
+
+import android.app.Application;
+import android.arch.lifecycle.AndroidViewModel;
+import android.arch.lifecycle.MutableLiveData;
+import android.os.AsyncTask;
+import android.util.Log;
+
+import java.util.List;
+
+/**
+ * Created by brian on 1/15/18.
+ */
+
+public class ResultViewModel extends AndroidViewModel {
+    private MutableLiveData<List<derpwork>> output_list, wifi_list;
+
+    private AppDatabase appDatabase; //instantiates database
+    private AppDatabase WifiDatabase;
+
+    public ResultViewModel(Application application){
+        super(application);
+        appDatabase = AppDatabase.getDatabase(this.getApplication());
+        WifiDatabase = AppDatabase.getLocalWifiDatabase(this.getApplication());
+        wifi_list = new MutableLiveData<List<derpwork>>();
+        wifi_list.setValue(WifiDatabase.networkDao().getAll_nonLiveData());
+        output_list = new MutableLiveData<List<derpwork>>();
+        output_list.setValue(appDatabase.networkDao().getAll_nonLiveData()); //grabs dataset
+    }
+
+
+    //getter method for dataset
+    public MutableLiveData<List<derpwork>> getOutput_list(){
+        return output_list;
+    }
+    public MutableLiveData<List<derpwork>> getWifi_list(){
+        return output_list;
+    }
+
+    /**
+    //delete item from db
+    public void deleteItem(derpwork network){
+        new deleteAsyncTask(appDatabase).execute(network);
+    }
+    **/
+    private static class deleteAsyncTask extends AsyncTask<derpwork, Void, Void>{
+        private AppDatabase db;
+
+        deleteAsyncTask(AppDatabase appDatabase){
+            db=appDatabase;
+        }
+
+        @Override
+        protected Void doInBackground(final derpwork... params){
+            db.networkDao().delete(params[0]);
+            return null;
+        }
+    }
+
+    //does the actual querying-the-db-part
+    public void query_for_search_result(String search_query){
+        List<derpwork> search_results = appDatabase.networkDao().station_query_nonLiveData(search_query);
+        List<derpwork> full_results = appDatabase.networkDao().getAll_nonLiveData();
+        output_list.setValue(search_results);
+
+        Log.d("search query",search_query);
+        Log.d("search swapped","yes");
+        Log.d("size of result",Integer.toString(search_results.size()));
+        Log.d("full db size",Integer.toString(full_results.size()));
+        //if(search_results==null){Log.e("does the object exist","no");}
+        //else{Log.d("does the object exist","yes");}
+
+        //for now, some demo code that Logs the search results
+        //will eventually trigger changes
+        //List<derpwork> results_log = (List<derpwork>)search_results;
+
+        //return search_results;
+    }
+}
+package com.example.brian.subwaytime;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+
+import java.util.UUID;
+
+public class StartActivity extends AppCompatActivity {
+
+    Button activityScan;
+    Button mainActivity;
+    Button firebase;
+    Button magnetism;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_start);
+        activityScan = findViewById(R.id.button2);
+        mainActivity = findViewById(R.id.button3);
+        firebase = findViewById(R.id.button7);
+        magnetism = findViewById(R.id.button8);
+
+
+        //portal to easily switch between apps
+        //main activity to be set here
+
+        activityScan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), ActivityScan.class);
+                startActivity(intent);
+                //add portal to ActivityScan
+                //portal to wifi scan
+            }
+        });
+
+        mainActivity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                startActivity(intent);
+                //portal to go to display db
+            }
+        });
+
+        firebase.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), FirebaseTest.class);
+                startActivity(intent);
+
+            }
+        });
+        magnetism.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(),MagneticData.class);
+                startActivity(intent);
+            }
+        });
+
+        //TODO: generate CONSTANT user id (UUID) to be persistently stored
+        //TODO: add timestamp to each magnetic data option
+        //TODO: link magnetism with wifi tracker in some way (perhaps make the switch continuous)
+        //TODO: this means the the button shouldn't be the WIFI scanner, but should be MAGNETISM tracker
+        final String id_persistent = PersistentID.get_id();
+        Log.d("id",id_persistent);
+    }
+
+
+
+}
+package com.example.brian.subwaytime;
+
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Index;
+import android.arch.persistence.room.PrimaryKey;
+
+/**
+ * Created by brian on 1/11/18.
+ * new entries are automatically checked if their mac address is already in the db
+ */
+
+@Entity(indices={@Index(value={"mac_address"},unique=true)})
+public class derpwork {
+
+    public derpwork(){
+
+    }
+
+    @PrimaryKey(autoGenerate = true)
+    public int network_id;
+
+
+
+    @ColumnInfo(name="network_name") //actually station names
+    private String name;
+
+
+    @ColumnInfo(name="ssid")
+    private String ssid;
+
+
+    @ColumnInfo(name="mac_address")
+    private String mac;
+
+    @ColumnInfo(name="capabilities")
+    private String capabilities;
+
+    @ColumnInfo(name="level")
+    private String level;
+    @ColumnInfo(name="frequency")
+    private String frequency;
+    @ColumnInfo(name="timestamp")
+    private String timestamp;
+    @ColumnInfo(name="distance")
+    private String distance;
+    @ColumnInfo(name="distanceSD")
+    private String distanceSD;
+    @ColumnInfo(name="passpoint")
+    private String passpoint;
+
+    public int getNetwork_id(){return network_id;}
+    public void setNetwork_id(int id){network_id=id;}
+
+    public String getName(){return name;}
+    public void setName(String a){name=a;}
+
+    public String getSsid(){return ssid;}
+    public void setSsid(String ss){ssid=ss;}
+
+    public String getMac(){return mac;}
+    public void setMac(String m){mac=m;}
+
+    public String getCapabilities(){return capabilities;}
+    public void setCapabilities(String c){capabilities=c;}
+
+    public String getLevel(){return level;}
+    public void setLevel(String l){level=l;}
+
+    public String getFrequency(){return frequency;}
+    public void setFrequency(String f){frequency=f;}
+
+    public String getTimestamp(){return timestamp;}
+    public void setTimestamp(String t){timestamp=t;}
+
+    public String getDistance(){return distance;}
+    public void setDistance(String d){distance=d;}
+
+    public String getDistanceSD(){return distanceSD;}
+    public void setDistanceSD(String dsd){distanceSD=dsd;}
+
+    public String getPasspoint(){return passpoint;}
+    public void setPasspoint(String p){passpoint=p;}
+
+}
