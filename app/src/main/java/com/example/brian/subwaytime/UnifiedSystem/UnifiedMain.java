@@ -58,7 +58,7 @@ import static android.hardware.Sensor.TYPE_MAGNETIC_FIELD;
 * the app stops suddenly when step 9 concludes without any exceptions
 * the prompt needs to formally request the station name for the networks
 *
-* TODOS:
+* TODO:
 * clean up front end to eliminate prompt in light of user indexing station names so DatabaseStuff can get cleeaned
 * */
 
@@ -89,7 +89,7 @@ public class UnifiedMain extends AppCompatActivity implements SensorEventListene
         //check if the user is actually running magnetometer
         String out = mSensorManager.getSensorList(TYPE_MAGNETIC_FIELD).toString();
         Log.d(TAG, "onCreate: type of magnetometer if at all:"+out);
-        if(out != ""){
+        if(out == ""){
             //user has no magnetometer. This is an issue. TODO
         }
 
